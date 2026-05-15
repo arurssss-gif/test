@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Artur's Final Game Hub</title>
+    <style>
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Nav */
+        nav { background: var(--panel); padding: 15px; display: flex; justify-content: center; gap: 15px; border-bottom: 2px solid var(--accent); }
+        nav button { background: #334155; border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        nav button.active { background: var(--accent); color: #000; }
+
+        .tab { display: none; flex: 1; width: 100%; height: 100%; }
+        .tab.active { display: flex; }
+
+        /* Clicker Layout */
+        .sidebar { width: 250px; background: rgba(0,0,0,0.3); padding: 20px; overflow-y: auto; border-right: 1px solid #334155; }
+        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .shop { width: 320px; background: var(--panel); padding: 20px; overflow-y: auto; border-left: 1px solid #334155; }
+
+        #asset { font-size: 120px; cursor: pointer; user-select: none; transition: 0.1s; }
+        #asset:active { transform: scale(0.85); }
+        
+        .xp-bar { width: 250px; height: 10px; background: #334155; border-radius: 5px; margin: 15px; overflow: hidden; }
+        #xpFill { width: 0%; height: 100%; background: var(--accent); transition: 0.3s; }
+
+        .item { background: #2d3748; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #475569; }
+        .item button { width: 100%; padding: 8px; background: #22c55e; border: none; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        .item button:disabled { background: #4a5568; opacity: 0.5; }
+
+        /* Game Areas */
+        .canvas { width: 600px; height: 250px; background: #1e293b; border: 2px solid #334155; position: relative; overflow: hidden; margin: auto; }
+        #dino { position: absolute; bottom: 0; left: 50px; font-size: 40px; transform: scaleX(-1); }
+        #mosq { position: absolute; font-size: 40px; width: 40px; height: 40px; bottom: 50px; left: 150px; }
+        .cactus { position: absolute; bottom: 0; right: -50px; font-size: 35px; }
+        .cloud { position: absolute; width: 70px; height: 15px; background: white; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <button onclick="show('c')" id="nc" class="active">CLICKER</button>
+    <button onclick="show('d')" id="nd">DINO</button>
+    <button onclick="show('m')" id="nm">MOSQUITO</button>
+</nav>
+
+<div id="tc" class="tab active">
+    <div class="sidebar">
+        <h3 style="color:var(--accent)">Top Players</h3>
+        <div id="lb"></div>
+    </div>
+    <div class="main-content">
+        <h2 id="lvl">Level 1</h2>
+        <div class="xp-bar"><div id="xpFill"></div></div>
+        <div id="asset" onclick="doTap()">🪙</div>
+        <h1 id="bal">$0</h1>
+        <p>Click: +<span id="cpc">1</span> | Idle: +<span id="cps">0</span></p>
+    </div>
+    <div class="shop">
+        <h3 style="color:var(--accent)">Upgrades</h3>
+        <div id="sl"></div>
+    </div>
+</div>
+
+<div id="td" class="tab">
+    <div class="main-content">
+        <h1>Score: <span id="ds">0</span></h1>
+        <div class="canvas" onclick="dJump()">
+            <div id="dino">🦖</div>
+            <div id="cactusZone"></div>
+        </div>
+    </div>
+</div>
+
+<div id="tm" class="tab">
+    <div class="main-content">
+        <h1>Height: <span id="ms">0</span></h1>
+        <div class="canvas" style="width:350px; height:500px" id="mZone">
+            <div id="mosq">🦟</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- DATA ---
+    let bank = 0, clickP = 1, idleP = 0, xp = 0, lv = 1;
+    let upgs = [];
+    for(let i=1; i<=30; i++) {
+        upgs.push({ n: "Upgrade "+i, c: Math.floor(10 * Math.pow(1.6, i)), p: i*2, t: i%2===0?'c':'i' });
+    }
+
+    // --- TABS ---
+    function show(id) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('t'+id).classList.add('active');
+        document.getElementById('n'+id).classList.add('active');
+        if(id === 'd') startDino(); else stopDino();
+        if(id === 'm') startMos(); else stopMos();
+    }
+
+    // --- CLICKER ---
+    function doTap() {
+        bank += clickP;
+        xp += 10;
+        if(xp >= 100) { xp = 0; lv++; }
+        refresh();
+    }
+
+    function buy(i) {
+        if(bank >= upgs[i].c) {
+            bank -= upgs[i].c;
+            if(upgs[i].t === 'c') clickP += upgs[i].p; else idleP += upgs[i].p;
+            upgs[i].c = Math.floor(upgs[i].c * 2);
+            refresh();
+        }
+    }
+
+    function refresh() {
+        document.getElementById('bal').innerText = "$" + Math.floor(bank);
+        document.getElementById('cpc').innerText = clickP;
+        document.getElementById('cps').innerText = idleP;
+        document.getElementById('xpFill').style.width = xp + "%";
+        document.getElementById('lvl').innerText = "Level " + lv;
+        
+        let icons = ["🪙","💵","💰","💎","👑","🏦","🏛️"];
+        document.getElementById('asset').innerText = icons[Math.min(lv-1, 6)];
+
+        // Shop
+        let sHtml = "";
+        upgs.forEach((u, i) => {
+            sHtml += `<div class="item">
+                <b>${u.n}</b> (+${u.p} ${u.t==='c'?'Tap':'Sec'})
+                <button onclick="buy(${i})" ${bank < u.c ? 'disabled':''}>Buy: $${u.c}</button>
+            </div>`;
+        });
+        document.getElementById('sl').innerHTML = sHtml;
+
+        // Leaderboard
+        let lHtml = <div style="color:var(--accent)">1. You: $${Math.floor(bank)}</div>;
+        for(let i=2; i<=10; i++) lHtml += <div>${i}. Bot_${i}: $${Math.floor(bank/(i*0.8))}</div>;
+        document.getElementById('lb').innerHTML = lHtml;
+    }
+
+    setInterval(() => { if(idleP > 0) { bank += idleP; refresh(); } }, 1000);
+
+    // --- DINO ---
+    let dI, dScore = 0, dSpd = 6, isJ = false;
+    function dJump() { if(!isJ) { isJ=true; let d=document.getElementById('dino'); d.style.bottom="130px"; setTimeout(()=>{d.style.bottom="0px"; isJ=false;}, 500); } }
+    function startDino() {
+        dScore = 0; dSpd = 6;
+        document.getElementById('cactusZone').innerHTML = "";
+        dI = setInterval(() => {
+            dScore++; dSpd += 0.001;
+            document.getElementById('ds').innerText = Math.floor(dScore/10);
+            if(Math.random() < 0.02) {
+                let c = document.createElement('div'); c.className = 'cactus';
+                c.innerText = Math.random() > 0.5 ? '🌵' : '🌵🌵';
+                c.style.right = "-50px"; document.getElementById('cactusZone').appendChild(c);
+            }
+            document.querySelectorAll('.cactus').forEach(c => {
+                let r = parseInt(c.style.right) || -50;
+                c.
