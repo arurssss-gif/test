@@ -2,79 +2,151 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>RUN - ARTUR STABLE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUN - ARTUR GAMES</title>
     <style>
-        body { background: #05070a; color: white; font-family: sans-serif; text-align: center; margin: 0; }
-        nav { background: #10141b; padding: 20px; border-bottom: 2px solid #00f2ff; }
-        button { background: #1a1f26; color: white; border: 1px solid #333; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 5px; }
-        .tab { display: none; padding: 20px; }
-        .active { display: block !important; }
-        #coin { font-size: 100px; cursor: pointer; user-select: none; margin: 30px; display: inline-block; }
+        :root { --accent: #00f2ff; --bg: #05070a; --panel: #10141b; --xp: #7000ff; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Брендинг */
+        .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 80px; font-weight: 900; color: rgba(255,255,255,0.03); pointer-events: none; }
+        .watermark { position: fixed; bottom: 15px; right: 25px; font-size: 18px; font-weight: bold; color: rgba(0,242,255,0.2); }
+
+        nav { background: var(--panel); display: flex; justify-content: center; gap: 15px; padding: 15px; border-bottom: 2px solid var(--accent); z-index: 100; }
+        nav button { background: #1a1f26; border: 1px solid #333; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        nav button.active { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
+
+        .tab { display: none; flex: 1; width: 100%; height: 100%; }
+        .tab.active { display: flex; }
+
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .shop { width: 320px; background: var(--panel); padding: 20px; border-left: 1px solid #222; overflow-y: auto; }
+
+        /* Кликер */
+        #coin { font-size: 140px; cursor: pointer; user-select: none; transition: 0.1s; filter: drop-shadow(0 0 20px rgba(0,242,255,0.1)); }
         #coin:active { transform: scale(0.9); }
-        .shop-box { max-width: 300px; margin: 0 auto; background: #10141b; padding: 10px; border-radius: 10px; }
+        .xp-box { width: 300px; height: 10px; background: #222; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        #xp-bar { width: 0%; height: 100%; background: var(--accent); transition: 0.3s; }
+
+        .card { background: #1c2128; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+        .card button { width: 100%; padding: 10px; background: #238636; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        .card button:disabled { background: #333; color: #666; }
+
+        /* Игровое сообщение */
+        #game-msg { position: absolute; top: 100px; font-size: 24px; font-weight: bold; color: var(--accent); opacity: 0; transition: 0.3s; pointer-events: none; }
+
+        /* Дино */
+        .zone { width: 600px; height: 300px; background: #000; border: 2px solid #333; position: relative; overflow: hidden; border-radius: 15px; }
+        #dino { position: absolute; bottom: 0; left: 60px; font-size: 50px; transform: scaleX(-1); }
+        .cactus { position: absolute; bottom: 0; font-size: 35px; }
     </style>
 </head>
 <body>
 
+<div class="side-run">RUN</div>
+<div class="watermark">arurs</div>
+<div id="game-msg">LEVEL UP!</div>
+
 <nav>
-    <button onclick="st('c')">КЛИКЕР</button>
-    <button onclick="st('d')">ДИНО</button>
+    <button onclick="tab('c')" id="b-c" class="active">КЛИКЕР</button>
+    <button onclick="tab('d')" id="b-d">ДИНО</button>
+    <a href="https://www.tiktok.com/@arursss" target="_blank" style="background:#ff0050; color:white; padding:10px 20px; text-decoration:none; border-radius:8px; font-weight:bold;">TIKTOK</a>
 </nav>
 
 <div id="t-c" class="tab active">
-    <h1 id="bal">$0</h1>
-    <div id="coin" onclick="tap()">🪙</div>
-    <div class="shop-box">
-        <h3>МАГАЗИН</h3>
-        <button onclick="buy()">КУПИТЬ АПГРЕЙД ($10)</button>
+    <div class="main">
+        <h2 id="lvl-txt">УРОВЕНЬ 1</h2>
+        <div class="xp-box"><div id="xp-bar"></div></div>
+        <div id="coin" onclick="tap()">🪙</div>
+        <h1 id="bal-txt">$0</h1>
     </div>
+    <div class="shop"><h3 style="text-align:center">ПРОКАЧКА</h3><div id="shop-list"></div></div>
 </div>
 
 <div id="t-d" class="tab">
-    <h1>ДИНОЗАВРИК</h1>
-    <div id="zone" onclick="jump()" style="width:300px; height:150px; border:2px solid white; margin: 0 auto; position:relative; overflow:hidden;">
-        <div id="dino" style="position:absolute; bottom:0; left:20px; font-size:30px;">🦖</div>
+    <div class="main">
+        <h1 id="d-sc">СЧЕТ: 0</h1>
+        <div class="zone" onclick="jump()">
+            <div id="dino">🦖</div>
+            <div id="d-obs"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    let money = 0;
-    let power = 1;
+    let bal=0, pwr=1, xp=0, lvl=1, next=100;
+    let items = [];
+    for(let i=1; i<=15; i++) items.push({n: "Апгрейд "+i, c: Math.floor(20 * Math.pow(1.6, i)), p: i*3});
 
-    // КЛИКЕР
+    function showInfo(t) {
+        let m = document.getElementById('game-msg');
+        m.innerText = t; m.style.opacity = 1;
+        setTimeout(() => m.style.opacity = 0, 1000);
+    }
+
     window.tap = function() {
-        money += power;
-        document.getElementById('bal').innerText = "$" + money;
+        bal += pwr; xp += 10;
+        if(xp >= next) {
+            xp=0; lvl++; next *= 1.5;
+            showInfo("НОВЫЙ УРОВЕНЬ: " + lvl);
+            if(lvl == 5) document.getElementById('coin').innerText = "💰";
+            if(lvl == 10) document.getElementById('coin').innerText = "👑";
+            if(lvl == 15) document.getElementById('coin').innerText = "💎";
+        }
+        render();
     };
 
-    window.buy = function() {
-        if(money >= 10) {
-            money -= 10;
-            power += 1;
-            document.getElementById('bal').innerText = "$" + money;
-            alert("Прокачано!");
+    window.buy = function(i) {
+        if(bal >= items[i].c) {
+            bal -= items[i].c; pwr += items[i].p; items[i].c *= 2;
+            render();
         }
     };
 
-    // ПЕРЕКЛЮЧЕНИЕ
-    window.st = function(id) {
-        document.getElementById('t-c').classList.remove('active');
-        document.getElementById('t-d').classList.remove('active');
-        document.getElementById('t-' + id).classList.add('active');
+    function render() {
+        document.getElementById('bal-txt').innerText = "$" + Math.floor(bal);
+        document.getElementById('lvl-txt').innerText = "УРОВЕНЬ " + lvl;
+        document.getElementById('xp-bar').style.width = (xp/next*100) + "%";
+        let h = "";
+        items.forEach((it, i) => {
+            h += <div class="card"><b>${it.n}</b> (+${it.p})<br><button onclick="buy(${i})" ${bal < it.c ? 'disabled' : ''}>$${it.c}</button></div>;
+        });
+        document.getElementById('shop-list').innerHTML = h;
+    }
+
+    let dLoop, dy=0, dvy=0;
+    window.tab = function(id) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('t-'+id).classList.add('active');
+        document.getElementById('b-'+id).classList.add('active');
+        clearInterval(dLoop);
+        if(id === 'd') startDino();
     };
 
-    // ДИНО
-    let dy = 0;
-    window.jump = function() {
-        if(dy === 0) {
-            dy = 100;
-            document.getElementById('dino').style.bottom = dy + "px";
-            setTimeout(() => {
-                dy = 0;
-                document.getElementById('dino').style.bottom = "0px";
-            }, 500);
-        }
-    };
+    window.jump = function() { if(dy === 0) dvy = 15; };
+
+    function startDino() {
+        dy=0; dvy=0; let sc=0; document.getElementById('d-obs').innerHTML = "";
+        dLoop = setInterval(() => {
+            sc++; document.getElementById('d-sc').innerText = "СЧЕТ: " + Math.floor(sc/10);
+            dy += dvy; dvy -= 0.8; if(dy < 0) { dy=0; dvy=0; }
+            document.getElementById('dino').style.bottom = dy+"px";
+            if(Math.random() < 0.015) {
+                let c = document.createElement('div'); c.className='cactus'; c.innerText='🌵';
+                c.style.right="-50px"; document.getElementById('d-obs').appendChild(c);
+            }
+            document.querySelectorAll('.cactus').forEach(c => {
+                let r = parseInt(c.style.right)|| -50; r += 7; c.style.right = r+"px";
+                if(r > 510 && r < 540 && dy < 40) { 
+                    showInfo("GAME OVER!"); 
+                    clearInterval(dLoop); setTimeout(startDino, 1000); 
+                }
+                if(r > 700) c.remove();
+            });
+        }, 25);
+    }
+    render();
 </script>
 </body>
 </html>
