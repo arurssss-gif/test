@@ -2,128 +2,213 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Artur Game Hub v4.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUN - ARTUR GAMES</title>
     <style>
-        :root { --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; --text: #f8fafc; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        :root { --accent: #00f2ff; --xp: #7000ff; --bg: #05070a; --panel: #10141b; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Навигация */
-        nav { background: var(--panel); display: flex; justify-content: center; gap: 15px; padding: 15px; border-bottom: 2px solid var(--accent); z-index: 100; }
-        nav button { background: #334155; border: 1px solid var(--accent); color: var(--accent); padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        nav button.active { background: var(--accent); color: #000; }
+        /* Боковая надпись RUN */
+        .side-title { position: fixed; left: 10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 60px; font-weight: 900; color: rgba(255,255,255,0.05); z-index: 0; letter-spacing: 10px; pointer-events: none; }
 
-        .tab { display: none; flex: 1; width: 100%; height: 100%; overflow: hidden; }
+        /* Навигация */
+        nav { background: var(--panel); display: flex; justify-content: center; gap: 15px; padding: 15px; border-bottom: 2px solid var(--accent); position: relative; z-index: 10; }
+        nav button { background: #1a1f26; border: 1px solid #30363d; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        nav button.active { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
+        .tiktok-btn { background: #ff0050; border: none; color: white; text-decoration: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; font-size: 14px; }
+
+        .tab { display: none; flex: 1; width: 100%; height: 100%; position: relative; z-index: 5; }
         .tab.active { display: flex; }
 
-        /* Кликер Лейаут */
-        .sidebar { width: 280px; background: rgba(0,0,0,0.3); padding: 20px; overflow-y: auto; border-right: 1px solid #334155; }
-        .main-view { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #1e293b 0%, #0f172a 100%); position: relative; }
-        .shop-view { width: 350px; background: var(--panel); padding: 20px; overflow-y: auto; border-left: 1px solid #334155; }
-        
-        #coin { font-size: 140px; cursor: pointer; user-select: none; transition: 0.1s; filter: drop-shadow(0 0 30px rgba(251,191,36,0.3)); }
-        #coin:active { transform: scale(0.85); }
-        
-        /* Кнопки магазина */
-        .upg-card { background: #2d3748; padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #475569; }
-        .upg-card b { color: var(--accent); font-size: 18px; display: block; margin-bottom: 5px; }
-        .upg-card button { width: 100%; background: #22c55e; border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 8px; }
-        .upg-card button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
+        /* Кликер */
+        .sidebar { width: 260px; background: rgba(0,0,0,0.4); padding: 20px; border-right: 1px solid #222; overflow-y: auto; }
+        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .shop-bar { width: 320px; background: var(--panel); padding: 20px; border-left: 1px solid #222; overflow-y: auto; }
 
-        /* Игровые зоны */
-        .canvas { width: 600px; height: 300px; background: #161b22; border: 3px solid #334155; position: relative; overflow: hidden; border-radius: 15px; }
-        #dino { position: absolute; bottom: 0; left: 60px; font-size: 50px; z-index: 10; transform: scaleX(-1); transition: bottom 0.1s; }
-        .cactus { position: absolute; bottom: 0; font-size: 35px; z-index: 5; }
-        
-        #mosq { position: absolute; font-size: 40px; width: 40px; height: 40px; z-index: 10; }
-        .cloud { position: absolute; width: 80px; height: 15px; background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        /* Шкала уровня */
+        .lvl-container { width: 80%; max-width: 400px; background: #222; height: 12px; border-radius: 10px; margin: 20px 0; overflow: hidden; border: 1px solid #444; }
+        #lvl-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--xp), var(--accent)); transition: 0.3s; }
 
-        .stat-text { font-size: 24px; margin: 10px 0; font-weight: bold; }
-        .lb-row { padding: 10px 0; border-bottom: 1px solid #334155; font-size: 16px; display: flex; justify-content: space-between; }
+        #coin { font-size: 130px; cursor: pointer; user-select: none; transition: 0.1s; filter: drop-shadow(0 0 20px rgba(0,242,255,0.2)); }
+        #coin:active { transform: scale(0.85) rotate(5deg); }
+
+        .card { background: #1c2128; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 10px; transition: 0.2s; }
+        .card:hover { border-color: var(--accent); }
+        .card button { width: 100%; padding: 10px; background: #238636; border: none; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 8px; }
+        .card button:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+        /* Игры */
+        .game-box { width: 600px; height: 320px; background: #000; border: 2px solid #333; position: relative; overflow: hidden; border-radius: 15px; margin: 20px auto; }
+        #dino { position: absolute; bottom: 0; left: 50px; font-size: 45px; transform: scaleX(-1); }
+        .cactus { position: absolute; bottom: 0; font-size: 32px; }
+        #mosq { position: absolute; font-size: 40px; }
+        .platform { position: absolute; width: 70px; height: 10px; background: white; border-radius: 5px; box-shadow: 0 0 10px #fff; }
+
+        /* Watermark */
+        .watermark { position: fixed; bottom: 10px; right: 20px; font-size: 18px; font-weight: bold; color: rgba(255,255,255,0.2); letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
+<div class="side-title">RUN</div>
+<div class="watermark">arurs</div>
+
 <nav>
-    <button onclick="changeTab('c')" id="btn-c" class="active">КЛИКЕР</button>
-    <button onclick="changeTab('d')" id="btn-d">ДИНО</button>
-    <button onclick="changeTab('m')" id="btn-m">КОМАРИК</button>
+    <button onclick="tab('c')" id="m-c" class="active">КЛИКЕР</button>
+    <button onclick="tab('d')" id="m-d">ДИНО</button>
+    <button onclick="tab('m')" id="m-m">КОМАРИК</button>
+    <a href="https://www.tiktok.com/@arursss" target="_blank" class="tiktok-btn">MY TIKTOK</a>
 </nav>
 
-<div id="tab-c" class="tab active">
+<div id="t-c" class="tab active">
     <div class="sidebar">
-        <h2 style="color:var(--accent)">Лидеры</h2>
-        <div id="leaderboard"></div>
+        <h3 style="color:var(--accent)">ТОП ИГРОКОВ</h3>
+        <div id="lb"></div>
     </div>
-    <div class="main-view">
-        <div id="coin" onclick="handleTap()">🪙</div>
-        <div class="stat-text">Баланс: <span id="balance" style="color:var(--accent)">$0</span></div>
-        <p>За клик: +<span id="cpc">1</span></p>
+    <div class="main-content">
+        <h2 id="lvl-text">УРОВЕНЬ 1</h2>
+        <div class="lvl-container"><div id="lvl-fill"></div></div>
+        <div id="coin" onclick="clickMoney()">🪙</div>
+        <h1 id="bal-text" style="font-size: 40px; margin: 10px;">$0</h1>
+        <p>Клик: +<span id="pow-text">1</span> | До лвл: <span id="xp-text">0</span>/100</p>
     </div>
-    <div class="shop-view">
-        <h2 style="color:var(--accent)">Магазин (30)</h2>
+    <div class="shop-bar">
+        <h3 style="color:var(--accent)">МАГАЗИН</h3>
         <div id="shop"></div>
     </div>
 </div>
 
-<div id="tab-d" class="tab">
-    <div class="main-view">
-        <h1>Счет: <span id="d-score">0</span></h1>
-        <div class="canvas" id="d-area" onclick="dinoJump()">
+<div id="t-d" class="tab">
+    <div class="main-content">
+        <h1>СЧЕТ: <span id="d-score">0</span></h1>
+        <div class="game-box" onclick="dJump()">
             <div id="dino">🦖</div>
             <div id="d-obs"></div>
         </div>
-        <p>Пробел или Клик для прыжка</p>
+        <p>Кликни, чтобы прыгнуть!</p>
     </div>
 </div>
 
-<div id="tab-m" class="tab">
-    <div class="main-view">
-        <h1>Высота: <span id="m-score">0</span></h1>
-        <div class="canvas" style="width:400px; height:500px" id="m-area">
+<div id="t-m" class="tab">
+    <div class="main-content">
+        <h1>ВЫСОТА: <span id="m-score">0</span></h1>
+        <div class="game-box" style="width:380px; height:500px" id="m-box">
             <div id="mosq">🦟</div>
             <div id="m-obs"></div>
         </div>
-        <p>Стрелки — влево/вправо. Пробел — лететь.</p>
+        <p>Зажми экран, чтобы лететь. Наклон - стрелками.</p>
     </div>
 </div>
 
 <script>
-    let money = 0, power = 1;
-    let upgrades = [];
-    for(let i=1; i<=30; i++) {
-        upgrades.push({ name: "Мега-Клик " + i, price: Math.floor(15 * Math.pow(1.6, i)), boost: i * 3 });
-    }
+    let money = 0, power = 1, xp = 0, lvl = 1, nextLvl = 100;
+    let upgs = [];
+    for(let i=1; i<=30; i++) upgs.push({ n: "Улучшение "+i, c: Math.floor(15 * Math.pow(1.5, i)), p: i*3 });
 
-    // Вкладки
-    function changeTab(id) {
+    function tab(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + id).classList.add('active');
-        document.getElementById('btn-' + id).classList.add('active');
-        
-        stopDino(); stopMosq();
-        if(id === 'd') startDino();
-        if(id === 'm') startMosq();
+        document.getElementById('t-'+id).classList.add('active');
+        document.getElementById('m-'+id).classList.add('active');
+        stopD(); stopM();
+        if(id === 'd') startD();
+        if(id === 'm') startM();
     }
 
-    // Кликер
-    function handleTap() { money += power; updateUI(); }
-    function buyUpg(i) {
-        if(money >= upgrades[i].price) {
-            money -= upgrades[i].price;
-            power += upgrades[i].boost;
-            upgrades[i].price = Math.floor(upgrades[i].price * 2.1);
-            updateUI();
+    function clickMoney() {
+        money += power;
+        xp += 10;
+        if(xp >= nextLvl) {
+            xp = 0; lvl++; nextLvl = Math.floor(nextLvl * 1.5);
+            alert("НОВЫЙ УРОВЕНЬ: " + lvl);
+        }
+        update();
+    }
+
+    function buy(i) {
+        if(money >= upgs[i].c) {
+            money -= upgs[i].c;
+            power += upgs[i].p;
+            upgs[i].c *= 2;
+            update();
         }
     }
 
-    function updateUI() {
-        document.getElementById('balance').innerText = "$" + Math.floor(money);
-        document.getElementById('cpc').innerText = power;
-        
-        let lb = <div class="lb-row" style="color:var(--accent)"><b>1. Artur (Вы)</b> <span>$${Math.floor(money)}</span></div>;
-        for(let i=2; i<=12; i++) lb += <div class="lb-row"><span>${i}. Игрок_${i+5}</span> <span>$${Math.floor(money/(i*0.7))}</span></div>;
-        document.getElementById('leaderboard').innerHTML = lb;
+    function update() {
+        document.getElementById('bal-text').innerText = "$" + Math.floor(money);
+        document.getElementById('pow-text').innerText = power;
+        document.getElementById('lvl-text').innerText = "УРОВЕНЬ " + lvl;
+        document.getElementById('xp-text').innerText = xp;
+        document.getElementById('lvl-fill').style.width = (xp / nextLvl * 100) + "%";
 
-        let sh = "";
-        upgrades.forEach
+        let sH = "";
+        upgs.forEach((u, i) => {
+            sH += <div class="card"><b>${u.n}</b> (+${u.p})<br><button onclick="buy(${i})" ${money < u.c ? 'disabled' : ''}>Купить за $${u.c}</button></div>;
+        });
+        document.getElementById('shop').innerHTML = sH;
+
+        let lH = "";
+        for(let i=1; i<=10; i++) lH += <div style="padding:5px; border-bottom:1px solid #222">${i}. Игрок_${i}: $${Math.floor(money/(i*0.5+1))}</div>;
+        document.getElementById('lb').innerHTML = lH;
+    }
+
+    // ДИНО
+    let dI, dSc = 0, dy = 0, dvy = 0;
+    function dJump() { if(dy === 0) dvy = 15; }
+    function startD() {
+        dSc = 0; dy = 0; dvy = 0; document.getElementById('d-obs').innerHTML = "";
+        dI = setInterval(() => {
+            dSc++; document.getElementById('d-score').innerText = Math.floor(dSc/10);
+            dy += dvy; dvy -= 0.8; if(dy < 0) { dy = 0; dvy = 0; }
+            document.getElementById('dino').style.bottom = dy + "px";
+            if(Math.random() < 0.02) {
+                let c = document.createElement('div'); c.className = 'cactus'; c.innerText = '🌵'; c.style.right = "-50px";
+                document.getElementById('d-obs').appendChild(c);
+            }
+            document.querySelectorAll('.cactus').forEach(c => {
+                let r = parseInt(c.style.right) || -50; r += 7; c.style.right = r + "px";
+                if(r > 510 && r < 540 && dy < 40) { stopD(); alert("GAME OVER"); startD(); }
+                if(r > 700) c.remove();
+            });
+        }, 25);
+    }
+    function stopD() { clearInterval(dI); }
+
+    // КОМАРИК
+    let mI, mx=160, my=100, mvy=0, mH=false, mSc=0, platforms=[];
+    function startM() {
+        mx=160; my=100; mvy=0; mSc=0; platforms=[];
+        document.getElementById('m-obs').innerHTML = "";
+        for(let i=0; i<7; i++) {
+            let px = Math.random()*300, py = i*80;
+            let p = document.createElement('div'); p.className='platform'; p.style.left=px+'px'; p.style.bottom=py+'px';
+            document.getElementById('m-obs').appendChild(p);
+            platforms.push({x:px, y:py, el:p});
+        }
+        mI = setInterval(() => {
+            mvy -= 0.4; if(mH) mvy += 1; my += mvy;
+            platforms.forEach(p => {
+                if(mvy < 0 && mx > p.x-30 && mx < p.x+70 && my > p.y && my < p.y+15) { mvy = 11; mSc++; }
+                if(my > 200) { p.y -= mvy; p.el.style.bottom = p.y+'px'; }
+                if(p.y < -20) { p.y = 520; p.x = Math.random()*300; p.el.style.left = p.x+'px'; }
+            });
+            if(my < -50) { stopM(); alert("УПАЛ!"); startM(); }
+            let mEl = document.getElementById('mosq');
+            mEl.style.left = mx + "px"; mEl.style.bottom = Math.min(my, 200) + "px";
+            document.getElementById('m-score').innerText = mSc;
+        }, 25);
+    }
+    function stopM() { clearInterval(mI); }
+
+    window.onkeydown = (e) => { 
+        if(e.code === "Space") { mH = true; dJump(); e.preventDefault(); }
+        if(e.code === "ArrowLeft") mx = Math.max(0, mx - 25);
+        if(e.code === "ArrowRight") mx = Math.min(340, mx + 25);
+    };
+    window.onkeyup = (e) => { if(e.code === "Space") mH = false; };
+    document.addEventListener('mousedown', () => { mH = true; dJump(); });
+    document.addEventListener('mouseup', () => mH = false);
+    update();
+</script>
+</body>
+</html>
