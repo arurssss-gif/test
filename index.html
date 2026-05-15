@@ -8,7 +8,6 @@
         :root { --accent: #00f2ff; --bg: #05070a; --panel: #0d1117; --rage: #ff0050; --gold: #ffd700; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; user-select: none; }
         
-        /* Фон и Брендинг */
         .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 120px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; }
         .watermark { position: fixed; bottom: 20px; left: 100px; font-size: 20px; font-weight: bold; color: rgba(0,242,255,0.15); letter-spacing: 5px; }
 
@@ -16,39 +15,57 @@
         .rage-container { position: fixed; left: 30px; top: 50%; transform: translateY(-50%); width: 12px; height: 300px; background: #161b22; border: 1px solid #333; border-radius: 10px; overflow: hidden; }
         #rage-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: var(--rage); box-shadow: 0 0 20px var(--rage); transition: 0.2s; }
 
-        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .shop { width: 400px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; z-index: 10; }
-
-        /* Монета */
-        #coin-wrap { position: relative; width: 450px; height: 450px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        #coin { font-size: 260px; transition: transform 0.05s; filter: drop-shadow(0 0 50px rgba(0,242,255,0.1)); z-index: 5; }
-        #coin:active { transform: scale(0.9); }
+        /* Главная рабочая область */
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 20px; }
         
-        .rage-active #coin { filter: drop-shadow(0 0 80px var(--rage)) !important; animation: shake 0.1s infinite; }
+        /* Адаптивный магазин */
+        .shop { width: 30%; min-width: 360px; max-width: 450px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .shop-items-container { flex: 1; overflow-y: auto; padding-right: 5px; }
+
+        /* Новая CSS монета вместо эмодзи */
+        #coin-wrap { position: relative; width: 350px; height: 350px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 20px 0; }
+        .digital-coin { 
+            width: 220px; height: 220px; background: radial-gradient(circle, #ffe566 0%, #cc9900 100%); 
+            border: 8px solid #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 90px; font-weight: 900; color: #664d00; user-select: none; transition: transform 0.05s, box-shadow 0.2s;
+            box-shadow: 0 0 40px rgba(0,242,255,0.25), inset 0 0 20px rgba(255,255,255,0.5);
+        }
+        #coin-wrap:active .digital-coin { transform: scale(0.9); }
+        
+        /* Эффекты скинов монеты */
+        .coin-skin-2 { background: radial-gradient(circle, #ffffff 0%, #7a94a8 100%) !important; border-color: #b0c4de !important; color: #2f4f4f !important; }
+        .coin-skin-3 { background: radial-gradient(circle, #e6b8a2 0%, #9d0208 100%) !important; border-color: #dc2f02 !important; color: #370000 !important; }
+
+        /* Анимация Rage моды */
+        .rage-active .digital-coin { box-shadow: 0 0 60px var(--rage) !important; animation: shake 0.1s infinite; border-color: var(--rage) !important; }
         @keyframes shake { 0%{transform:translate(2px)} 50%{transform:translate(-2px)} 100%{transform:translate(2px)} }
 
-        /* Интерфейс */
-        .stats-top { position: absolute; top: 20px; text-align: center; }
-        h1#money { font-size: 70px; margin: 0; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--accent); }
+        .stats-top { text-align: center; margin-bottom: 10px; }
+        h1#money { font-size: 65px; margin: 5px 0; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--accent); }
         .prestige-info { color: var(--gold); font-weight: bold; font-size: 14px; margin-top: 5px; }
 
-        /* Магазин */
-        .item { background: #1c2128; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin-bottom: 10px; position: relative; overflow: hidden; }
-        .item b { color: var(--accent); font-size: 16px; }
-        .item button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #238636; color: white; margin-top: 8px; }
-        .item button:disabled { background: #21262d; color: #484f58; }
+        /* Красивые карточки товаров */
+        .item { background: #1c2128; border: 1px solid #30363d; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-sizing: border-box; transition: border-color 0.2s; }
+        .item:hover { border-color: var(--accent); }
+        .item b { color: var(--accent); font-size: 16px; display: block; margin-bottom: 4px; }
+        .item small { color: #8b949e; display: block; margin-bottom: 8px; }
+        .item button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #238636; color: white; transition: background 0.2s; }
+        .item button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+        .item button:not(:disabled):hover { background: #2ea043; }
 
-        /* Частицы и тексты */
+        /* Эффекты тапа */
         .particle { position: absolute; width: 6px; height: 6px; background: var(--accent); pointer-events: none; border-radius: 2px; animation: p-out 0.8s ease-out forwards; }
         @keyframes p-out { 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(360deg); } }
 
         .pop { position: absolute; pointer-events: none; animation: popUp 0.7s forwards; font-weight: 900; font-size: 28px; z-index: 100; text-shadow: 2px 2px 0 #000; }
         @keyframes popUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-150px); } }
 
-        /* Престиж Кнопка */
-        #prestige-btn { display: none; position: absolute; bottom: 30px; background: var(--gold); color: black; padding: 15px 30px; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; box-shadow: 0 0 20px var(--gold); }
+        #prestige-btn { display: none; margin-top: 15px; background: var(--gold); color: black; padding: 12px 25px; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; box-shadow: 0 0 20px var(--gold); transition: transform 0.2s; }
+        #prestige-btn:hover { transform: scale(1.05); }
 
         #msg { position: absolute; top: 120px; background: white; color: black; padding: 10px 30px; border-radius: 50px; font-weight: bold; opacity: 0; transition: 0.4s; z-index: 1000; }
+        .reset-btn { margin-top: 15px; opacity: 0.2; background: none; color: white; border: none; cursor: pointer; padding: 5px; font-size: 11px; }
+        .reset-btn:hover { opacity: 0.8; color: var(--rage); }
     </style>
 </head>
 <body id="body">
@@ -67,17 +84,17 @@
     </div>
 
     <div id="coin-wrap" onmousedown="handleTap(event)">
-        <div id="coin">🪙</div>
+        <div id="coin" class="digital-coin">$</div>
     </div>
     
     <button id="prestige-btn" onclick="doPrestige()">ПЕРЕРОЖДЕНИЕ (X2 СИЛА)</button>
-    <p style="opacity: 0.4;">Сила клика: <span id="pwr-val">1</span> | Рекорд: <span id="best-val">0</span></p>
+    <p style="opacity: 0.4; margin-top: 15px;">Сила клика: <span id="pwr-val">1</span> | Всего кликов: <span id="best-val">0</span></p>
 </div>
 
 <div class="shop">
-    <h3 style="text-align: center; color: var(--accent); margin-top: 0;">MARKET</h3>
-    <div id="shop-list"></div>
-    <button style="margin-top:20px; opacity:0.2; background:none; color:white; border:none; cursor:pointer;" onclick="hardReset()">Сброс данных</button>
+    <h3 style="text-align: center; color: var(--accent); margin-top: 0; letter-spacing: 3px;">MARKET</h3>
+    <div class="shop-items-container" id="shop-list"></div>
+    <button class="reset-btn" onclick="hardReset()">Сбросить прогресс</button>
 </div>
 
 <script>
@@ -89,7 +106,7 @@
         upgrades = [];
         for(let i=1; i<=30; i++) {
             upgrades.push({
-                name: "Модуль " + i,
+                name: "Улучшение #" + i,
                 cost: Math.floor(20 * Math.pow(1.7, i)),
                 bonus: Math.floor(4 * Math.pow(1.6, i))
             });
@@ -182,7 +199,7 @@
     };
 
     window.doPrestige = function() {
-        if(confirm("Перерождение сбросит деньги и апгрейды, но даст ПОСТОЯННЫЙ X2 множитель! Готов?")) {
+        if(confirm("Перерождение сбросит текущие деньги, но даст вечный X2 множитель! Начать?")) {
             prestigeMult *= 2;
             money = 0; pwr = 1; lvl = 1; xp = 0; nextXp = 100;
             initUpgrades();
@@ -194,7 +211,10 @@
 
     function updateSkin() {
         const c = document.getElementById('coin');
-        c.innerText = lvl > 15 ? "🌌" : (lvl > 10 ? "💎" : (lvl > 5 ? "💰" : "🪙"));
+        c.className = "digital-coin";
+        if (lvl > 15) { c.classList.add('coin-skin-3'); c.innerText = "✦"; }
+        else if (lvl > 8) { c.classList.add('coin-skin-2'); c.innerText = "♦️"; }
+        else { c.innerText = "$"; }
     }
 
     function updateUI() {
@@ -208,7 +228,7 @@
         let h = "";
         upgrades.forEach((u, i) => {
             const canBuy = money >= u.cost;
-            h += `<div class="item"><b>${u.name}</b><br><small>+${u.bonus.toLocaleString()} клик</small>
+            h += `<div class="item"><b>${u.name}</b><small>+${u.bonus.toLocaleString()} клик</small>
                   <button onclick="buy(${i})" ${canBuy ? '' : 'disabled'}>$${u.cost.toLocaleString()}</button></div>`;
         });
         document.getElementById('shop-list').innerHTML = h;
@@ -220,7 +240,7 @@
         setTimeout(() => m.style.opacity = 0, 1500);
     }
 
-    window.hardReset = function() { if(confirm("УДАЛИТЬ ВСЁ?")) { localStorage.clear(); location.reload(); } };
+    window.hardReset = function() { if(confirm("Полностью очистить сохранения?")) { localStorage.clear(); location.reload(); } };
 
     load();
 </script>
