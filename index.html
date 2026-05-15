@@ -3,51 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUN - ULTIMATE CLICKER</title>
+    <title>RUN - GOD CLICKER</title>
     <style>
         :root { --accent: #00f2ff; --bg: #05070a; --panel: #0d1117; }
-        body { 
-            background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; 
-            margin: 0; display: flex; height: 100vh; overflow: hidden; 
-        }
-        
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 100px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; }
-        .watermark { position: fixed; bottom: 20px; left: 20px; font-size: 20px; font-weight: bold; color: rgba(0,242,255,0.2); letter-spacing: 5px; }
-
-        .main { 
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            background: radial-gradient(circle at center, #111821 0%, #05070a 100%);
-        }
-
-        .shop { 
-            width: 380px; background: var(--panel); border-left: 2px solid #1f2937; 
-            display: flex; flex-direction: column; padding: 20px; overflow-y: auto;
-        }
-
-        #coin { 
-            font-size: 160px; cursor: pointer; user-select: none; transition: transform 0.1s; 
-            filter: drop-shadow(0 0 30px rgba(0,242,255,0.1)); margin: 20px;
-        }
-        #coin:active { transform: scale(0.85); }
-
-        .xp-container { width: 350px; height: 14px; background: #161b22; border-radius: 20px; margin: 20px 0; border: 1px solid #30363d; overflow: hidden; }
+        .watermark { position: fixed; bottom: 20px; left: 20px; font-size: 20px; font-weight: bold; color: rgba(0,242,255,0.15); letter-spacing: 5px; }
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #111821 0%, #05070a 100%); }
+        .shop { width: 400px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+        #coin { font-size: 160px; cursor: pointer; user-select: none; transition: transform 0.05s; filter: drop-shadow(0 0 30px rgba(0,242,255,0.1)); margin: 20px; }
+        #coin:active { transform: scale(0.92); }
+        .xp-box { width: 350px; height: 12px; background: #161b22; border-radius: 10px; margin: 20px 0; overflow: hidden; border: 1px solid #30363d; }
         #xp-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #7000ff); transition: 0.3s; }
-
-        h1#money { font-size: 70px; margin: 10px 0; text-shadow: 0 0 20px rgba(0,242,255,0.3); }
-        h2#lvl { color: var(--accent); letter-spacing: 2px; }
-
-        .item { 
-            background: #1c2128; border: 1px solid #30363d; padding: 15px; border-radius: 12px; 
-            margin-bottom: 12px;
-        }
-        .item b { display: block; margin-bottom: 8px; font-size: 16px; }
-        .item button { 
-            width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; 
-            cursor: pointer; background: #238636; color: white; transition: 0.2s;
-        }
+        h1#money { font-size: 65px; margin: 10px 0; color: #fff; text-shadow: 0 0 15px var(--accent); }
+        .item { background: #1c2128; border: 1px solid #30363d; padding: 15px; border-radius: 12px; margin-bottom: 12px; transition: 0.2s; }
+        .item:hover { border-color: var(--accent); }
+        .item b { display: block; font-size: 16px; margin-bottom: 5px; color: var(--accent); }
+        .item span { display: block; font-size: 13px; opacity: 0.6; margin-bottom: 10px; }
+        .item button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #238636; color: white; }
         .item button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-        
-        #msg { position: absolute; top: 40px; background: var(--accent); color: black; padding: 10px 25px; border-radius: 30px; font-weight: bold; opacity: 0; transition: 0.5s; z-index: 100; }
+        #msg { position: absolute; top: 50px; background: var(--accent); color: #000; padding: 12px 30px; border-radius: 50px; font-weight: bold; opacity: 0; transition: 0.4s; z-index: 100; }
     </style>
 </head>
 <body>
@@ -57,96 +32,93 @@
 <div class="watermark">arurs</div>
 
 <div class="main">
-    <h2 id="lvl">LEVEL 1</h2>
-    <div class="xp-container"><div id="xp-bar"></div></div>
-    <div id="coin" onclick="clickCoin()">🪙</div>
+    <h2 id="lvl" style="color:var(--accent)">LEVEL 1</h2>
+    <div class="xp-box"><div id="xp-bar"></div></div>
+    <div id="coin" onclick="tap()">🪙</div>
     <h1 id="money">$0</h1>
-    <p>Клик: +<span id="click-power">1</span></p>
+    <p>Сила клика: <span id="pwr-txt" style="color:var(--accent)">1</span></p>
 </div>
 
 <div class="shop">
-    <h2 style="text-align: center; color: var(--accent);">МАГАЗИН</h2>
-    <div id="items-list">
-        </div>
+    <h2 style="text-align: center; letter-spacing: 3px;">UPGRADES</h2>
+    <div id="shop-list"></div>
 </div>
 
 <script>
-    let money = 0;
-    let power = 1;
-    let xp = 0;
-    let lvl = 1;
-    let nextLvlXp = 100;
+    let money = 0, pwr = 1, xp = 0, lvl = 1, nextXp = 100;
 
-    // Генерируем 30 апгрейдов
-    const upgrades = [];
-    for (let i = 1; i <= 30; i++) {
-        upgrades.push({
-            name: "Улучшение #" + i,
-            cost: Math.floor(20 * Math.pow(1.5, i)),
-            bonus: i * 3
-        });
-    }
+    const names = [
+        "Медный палец", "Железный клик", "Алмазный тап", "Золотая рука", "Энерго-диск", 
+        "Кибер-усилитель", "Плазменный заряд", "Квантовый толчок", "Гравитационный молот", "Звездная пыль",
+        "Ядро реактора", "Темная материя", "Импульс пустоты", "Вечный двигатель", "Сингулярность",
+        "Код бога", "Взрыв сверхновой", "Галактический луч", "Анти-материя", "Разрыв реальности",
+        "Цифровой рай", "Абсолютная мощь", "Титан", "Оракул", "Мастер кликов",
+        "Легенда", "Бесконечность", "Творец", "Финал", "RUN - GOD"
+    ];
 
-    window.clickCoin = function() {
-        money += power;
-        xp += 10;
-        
-        if (xp >= nextLvlXp) {
-            xp = 0;
-            lvl++;
-            nextLvlXp = Math.floor(nextLvlXp * 1.6);
-            
-            const coinEl = document.getElementById('coin');
-            if (lvl >= 20) coinEl.innerText = "💎";
-            else if (lvl >= 15) coinEl.innerText = "👑";
-            else if (lvl >= 10) coinEl.innerText = "💰";
-            else if (lvl >= 5) coinEl.innerText = "💵";
+    const upgrades = names.map((name, i) => ({
+        name: name,
+        cost: Math.floor(20 * Math.pow(1.8, i)), // Экспоненциальная цена
+        bonus: Math.floor(2 * Math.pow(1.7, i))  // Экспоненциальный бонус (теперь ощутимо!)
+    }));
 
-            showNotify("LEVEL UP: " + lvl);
+    window.tap = function() {
+        money += pwr; xp += 10;
+        if (xp >= nextXp) {
+            xp = 0; lvl++; nextXp = Math.floor(nextXp * 1.5);
+            updateVisuals();
+            showMsg("LEVEL UP: " + lvl);
         }
         updateUI();
+    };
+
+    function updateVisuals() {
+        const c = document.getElementById('coin');
+        if (lvl >= 25) c.innerText = "🌌";
+        else if (lvl >= 20) c.innerText = "🌀";
+        else if (lvl >= 15) c.innerText = "💎";
+        else if (lvl >= 10) c.innerText = "👑";
+        else if (lvl >= 5) c.innerText = "💰";
     }
 
-    window.buyUpgrade = function(i) {
-        let u = upgrades[i];
-        if (money >= u.cost) {
-            money -= u.cost;
-            power += u.bonus;
-            u.cost = Math.floor(u.cost * 1.7); // Цена растет
+    window.buy = function(i) {
+        if (money >= upgrades[i].cost) {
+            money -= upgrades[i].cost;
+            pwr += upgrades[i].bonus;
+            upgrades[i].cost = Math.floor(upgrades[i].cost * 1.5);
             updateUI();
         }
-    }
+    };
 
     function updateUI() {
-        document.getElementById('money').innerText = "$" + Math.floor(money);
+        document.getElementById('money').innerText = "$" + Math.floor(money).toLocaleString();
         document.getElementById('lvl').innerText = "LEVEL " + lvl;
-        document.getElementById('click-power').innerText = power;
-        document.getElementById('xp-bar').style.width = (xp / nextLvlXp * 100) + "%";
+        document.getElementById('pwr-txt').innerText = pwr.toLocaleString();
+        document.getElementById('xp-bar').style.width = (xp / nextXp * 100) + "%";
 
-        let html = "";
-        upgrades.forEach((u, index) => {
+        let h = "";
+        upgrades.forEach((u, i) => {
             const canBuy = money >= u.cost;
-            html += `
+            h += `
                 <div class="item">
-                    <b>${u.name} <span style="color:var(--accent)">+${u.bonus}</span></b>
-                    <button onclick="buyUpgrade(${index})" ${canBuy ? '' : 'disabled'}>
+                    <b>${u.name}</b>
+                    <span>Дает: +${u.bonus.toLocaleString()} к клику</span>
+                    <button onclick="buy(${i})" ${canBuy ? '' : 'disabled'}>
                         $${u.cost.toLocaleString()}
                     </button>
                 </div>
             `;
         });
-        document.getElementById('items-list').innerHTML = html;
+        document.getElementById('shop-list').innerHTML = h;
     }
 
-    function showNotify(text) {
-        const el = document.getElementById('msg');
-        el.innerText = text; el.style.opacity = "1";
-        setTimeout(() => el.style.opacity = "0", 1500);
+    function showMsg(t) {
+        const e = document.getElementById('msg');
+        e.innerText = t; e.style.opacity = "1";
+        setTimeout(() => e.style.opacity = "0", 1500);
     }
 
-    // ВАЖНО: Запускаем отрисовку сразу при загрузке
     updateUI();
 </script>
-
 </body>
 </html>
