@@ -1,21 +1,71 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artur's Dashboard | Clicker</title>
+    <title>Artur's Game Hub</title>
     <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --accent: #fbbf24;
+            --text: #f8fafc;
+        }
+
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
+            overflow: hidden;
             display: flex;
+            flex-direction: column;
             height: 100vh;
         }
 
-        /* Main Game Area */
-        .viewport {
+        /* Navigation Bar */
+        nav {
+            background: var(--panel);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        nav button {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        nav button.active {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            position: relative;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* --- Clicker Styles --- */
+        .clicker-layout {
+            flex: 1;
+            display: flex;
+        }
+
+        .game-zone {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -23,170 +73,113 @@
             align-items: center;
         }
 
-        .stats {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .balance {
-            font-size: 60px;
-            font-weight: 800;
-            color: #fbbf24;
-            margin: 0;
-        }
-
-        #tapButton {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
+        #tapBtn {
+            width: 200px; height: 200px; border-radius: 50%;
             background: linear-gradient(145deg, #fbbf24, #d97706);
-            border: 8px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: bold;
-            color: #451a03;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            transition: transform 0.05s;
+            border: none; cursor: pointer; font-size: 24px; font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: 0.05s;
         }
 
-        #tapButton:active {
-            transform: scale(0.92);
-        }
+        #tapBtn:active { transform: scale(0.92); }
 
-        /* Store Sidebar */
         .sidebar {
-            width: 340px;
-            background-color: #1e293b;
-            border-left: 1px solid #334155;
-            padding: 25px;
-            overflow-y: auto;
+            width: 300px; background: var(--panel);
+            padding: 20px; border-left: 1px solid #334155;
         }
 
-        .store-title {
-            font-size: 20px;
-            border-bottom: 2px solid #fbbf24;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
+        .upgrade-card {
+            background: #334155; padding: 10px; border-radius: 8px; margin-bottom: 10px;
         }
 
-        .upgrade-btn {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #334155;
-            border: 1px solid #475569;
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: left;
+        /* --- Dino Styles --- */
+        #dino-game {
+            width: 600px; height: 200px; border-bottom: 2px solid white;
+            margin: auto; position: relative; overflow: hidden;
+            background: #1e293b;
         }
 
-        .upgrade-btn:hover:not(:disabled) {
-            background-color: #475569;
+        #dino {
+            width: 40px; height: 40px; background: #fbbf24;
+            position: absolute; bottom: 0; left: 50px;
         }
 
-        .upgrade-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
+        .cactus {
+            width: 20px; height: 40px; background: #ef4444;
+            position: absolute; bottom: 0; right: -20px;
         }
 
-        .upgrade-btn b {
-            display: block;
-            color: #fbbf24;
-            margin-top: 5px;
+        .jump-animation { animation: jump 0.5s linear; }
+        @keyframes jump {
+            0% { bottom: 0; }
+            30% { bottom: 100px; }
+            70% { bottom: 100px; }
+            100% { bottom: 0; }
         }
 
-        .social {
-            margin-top: 40px;
-            color: #38bdf8;
-            text-decoration: none;
+        .cactus-move { animation: move 1.5s infinite linear; }
+        @keyframes move {
+            0% { right: -20px; }
+            100% { right: 620px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="viewport">
-        <div class="stats">
-            <h1 class="balance">$<span id="bal">0</span></h1>
-            <p>Per Click: +<span id="cpc">1</span> | Per Second: +<span id="cps">0</span></p>
-        </div>
-        
-        <button id="tapButton">TAP</button>
+    <nav>
+        <button id="btn1" class="active" onclick="showTab('clicker')">CLICKER GAME</button>
+        <button id="btn2" onclick="showTab('dino')">DINO RUNNER</button>
+    </nav>
 
-        <a href="https://www.tiktok.com/@uunbra" class="social">Follow TikTok</a>
+    <div id="clicker" class="tab-content active">
+        <div class="clicker-layout">
+            <div class="game-zone">
+                <h1 style="color:var(--accent)">Balance: $<span id="bal">0</span></h1>
+                <button id="tapBtn">TAP</button>
+                <p>Click: +<span id="cpc">1</span> | Idle: +<span id="cps">0</span></p>
+                <a href="https://www.tiktok.com/@uunbra" style="color:cyan; text-decoration:none; margin-top:20px;">TikTok</a>
+            </div>
+            <div class="sidebar">
+                <h3>Shop</h3>
+                <div class="upgrade-card">
+                    Bot (+1/s) <br> <button onclick="buy('auto', 1, 10)">Buy for $10</button>
+                </div>
+                <div class="upgrade-card">
+                    Power (+1 Click) <br> <button onclick="buy('click', 1, 50)">Buy for $50</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="sidebar">
-        <div class="store-title">Upgrades Shop</div>
-        
-        <button class="upgrade-btn" onclick="buy('click', 1, 10)">
-            Micro-Processor (+1 Click)
-            <b id="cost-c1">Cost: 10</b>
-        </button>
-
-        <button class="upgrade-btn" onclick="buy('click', 10, 100)">
-            Logic Engine (+10 Click)
-            <b id="cost-c2">Cost: 100</b>
-        </button>
-
-        <button class="upgrade-btn" onclick="buy('auto', 1, 5)">
-            Basic Bot (+1/sec)
-            <b id="cost-a1">Cost: 5</b>
-        </button>
-
-        <button class="upgrade-btn" onclick="buy('auto', 50, 500)">
-            Server Farm (+50/sec)
-            <b id="cost-a2">Cost: 500</b>
-        </button>
+    <div id="dino-tab" class="tab-content">
+        <div style="text-align:center; width:100%; margin-top:50px;">
+            <h2>Dino Runner</h2>
+            <p>Press SPACE or Click to Jump!</p>
+            <div id="dino-game" onclick="dinoJump()">
+                <div id="dino"></div>
+                <div id="cactus" class="cactus"></div>
+            </div>
+            <h3 id="dino-score">Score: 0</h3>
+        </div>
     </div>
 
     <script>
-        // Game State
-        let balance = 0;
-        let clickPower = 1;
-        let autoPower = 0;
-
-        const balEl = document.getElementById('bal');
-        const cpcEl = document.getElementById('cpc');
-        const cpsEl = document.getElementById('cps');
-        const tapBtn = document.getElementById('tapButton');
-
-        // Click logic
-        tapBtn.onclick = () => {
-            balance += clickPower;
-            updateUI();
-        };
-
-        // Purchase logic
-        function buy(type, amount, price) {
-            if (balance >= price) {
-                balance -= price;
-                if (type === 'click') clickPower += amount;
-                if (type === 'auto') autoPower += amount;
-                updateUI();
-            }
-        }
-
-        function updateUI() {
-            balEl.innerText = Math.floor(balance);
-            cpcEl.innerText = clickPower;
-            cpsEl.innerText = autoPower;
+        // Tab switching logic
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             
-            // Disable buttons if not enough money
-            // (You can add more logic here for auto-updating prices)
+            if(tabName === 'clicker') {
+                document.getElementById('clicker').classList.add('active');
+                document.getElementById('btn1').classList.add('active');
+            } else {
+                document.getElementById('dino-tab').classList.add('active');
+                document.getElementById('btn2').classList.add('active');
+                startDino();
+            }
         }
 
-        // Auto-clicker interval
-        setInterval(() => {
-            if (autoPower > 0) {
-                balance += autoPower;
-                updateUI();
-            }
-        }, 1000);
-
-        // Initial update
-        updateUI();
-    </script>
-</body>
-</html>
+        // --- Clicker Logic ---
+        let balance = 0;
+        let cpc = 1;
+        let cps
