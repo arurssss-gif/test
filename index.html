@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,29 +15,29 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             height: 100vh;
         }
 
-        /* Navigation Bar */
+        /* Navigation */
         nav {
             background: var(--panel);
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             padding: 15px;
             border-bottom: 2px solid var(--accent);
+            z-index: 100;
         }
 
         nav button {
             background: transparent;
             border: 2px solid var(--accent);
             color: var(--accent);
-            padding: 8px 20px;
+            padding: 10px 25px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
@@ -49,23 +49,25 @@
             color: var(--bg);
         }
 
+        /* Tab Management */
         .tab-content {
             display: none;
             flex: 1;
-            position: relative;
+            width: 100%;
         }
 
         .tab-content.active {
             display: flex;
         }
 
-        /* --- Clicker Styles --- */
-        .clicker-layout {
-            flex: 1;
+        /* --- Clicker Game Layout --- */
+        .clicker-view {
             display: flex;
+            width: 100%;
+            height: 100%;
         }
 
-        .game-zone {
+        .main-area {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -74,112 +76,233 @@
         }
 
         #tapBtn {
-            width: 200px; height: 200px; border-radius: 50%;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
             background: linear-gradient(145deg, #fbbf24, #d97706);
-            border: none; cursor: pointer; font-size: 24px; font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 28px;
+            font-weight: bold;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: 0.05s;
+            transition: transform 0.05s;
         }
 
         #tapBtn:active { transform: scale(0.92); }
 
         .sidebar {
-            width: 300px; background: var(--panel);
-            padding: 20px; border-left: 1px solid #334155;
+            width: 320px;
+            background: var(--panel);
+            padding: 20px;
+            border-left: 1px solid #334155;
         }
 
-        .upgrade-card {
-            background: #334155; padding: 10px; border-radius: 8px; margin-bottom: 10px;
+        .shop-item {
+            background: #334155;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
 
-        /* --- Dino Styles --- */
-        #dino-game {
-            width: 600px; height: 200px; border-bottom: 2px solid white;
-            margin: auto; position: relative; overflow: hidden;
+        .buy-btn {
+            width: 100%;
+            padding: 10px;
+            background: #22c55e;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .buy-btn:disabled { background: #64748b; opacity: 0.5; }
+
+        /* --- Dino Game Style --- */
+        .dino-view {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gameArea {
+            width: 600px;
+            height: 200px;
+            border-bottom: 3px solid white;
             background: #1e293b;
+            position: relative;
+            overflow: hidden;
         }
 
-        #dino {
-            width: 40px; height: 40px; background: #fbbf24;
-            position: absolute; bottom: 0; left: 50px;
+        #dinoChar {
+            width: 40px;
+            height: 40px;
+            background: #fbbf24;
+            position: absolute;
+            bottom: 0;
+            left: 50px;
         }
 
-        .cactus {
-            width: 20px; height: 40px; background: #ef4444;
-            position: absolute; bottom: 0; right: -20px;
+        #cactusObj {
+            width: 25px;
+            height: 45px;
+            background: #ef4444;
+            position: absolute;
+            bottom: 0;
+            right: -30px;
         }
 
-        .jump-animation { animation: jump 0.5s linear; }
-        @keyframes jump {
+        .jump { animation: jumpAnim 0.5s linear; }
+        @keyframes jumpAnim {
             0% { bottom: 0; }
             30% { bottom: 100px; }
             70% { bottom: 100px; }
             100% { bottom: 0; }
         }
 
-        .cactus-move { animation: move 1.5s infinite linear; }
-        @keyframes move {
-            0% { right: -20px; }
-            100% { right: 620px; }
+        .cactus-move { animation: moveAnim 1.5s infinite linear; }
+        @keyframes moveAnim {
+            0% { right: -30px; }
+            100% { right: 630px; }
         }
     </style>
 </head>
 <body>
 
     <nav>
-        <button id="btn1" class="active" onclick="showTab('clicker')">CLICKER GAME</button>
-        <button id="btn2" onclick="showTab('dino')">DINO RUNNER</button>
+        <button id="navClicker" class="active" onclick="switchTab('clicker')">CLICKER</button>
+        <button id="navDino" onclick="switchTab('dino')">DINO RUN</button>
     </nav>
 
-    <div id="clicker" class="tab-content active">
-        <div class="clicker-layout">
-            <div class="game-zone">
-                <h1 style="color:var(--accent)">Balance: $<span id="bal">0</span></h1>
+    <div id="tabClicker" class="tab-content active">
+        <div class="clicker-view">
+            <div class="main-area">
+                <h1 style="font-size: 3rem; color: var(--accent); margin: 0;">$<span id="balance">0</span></h1>
+                <p>Click: +<span id="cpc">1</span> | Idle: +<span id="cps">0</span>/s</p>
                 <button id="tapBtn">TAP</button>
-                <p>Click: +<span id="cpc">1</span> | Idle: +<span id="cps">0</span></p>
-                <a href="https://www.tiktok.com/@uunbra" style="color:cyan; text-decoration:none; margin-top:20px;">TikTok</a>
+                <a href="https://www.tiktok.com/@uunbra" target="_blank" style="color:#38bdf8; margin-top:20px; text-decoration:none;">My TikTok</a>
             </div>
             <div class="sidebar">
-                <h3>Shop</h3>
-                <div class="upgrade-card">
-                    Bot (+1/s) <br> <button onclick="buy('auto', 1, 10)">Buy for $10</button>
+                <h2 style="border-bottom:1px solid #444; padding-bottom:10px;">Store</h2>
+                <div class="shop-item">
+                    <span>Automation (+1/s)</span>
+                    <button id="buyAuto" class="buy-btn" onclick="buyItem('auto', 1, 10)">Cost: $10</button>
                 </div>
-                <div class="upgrade-card">
-                    Power (+1 Click) <br> <button onclick="buy('click', 1, 50)">Buy for $50</button>
+                <div class="shop-item">
+                    <span>Power (+1 Click)</span>
+                    <button id="buyClick" class="buy-btn" onclick="buyItem('click', 1, 50)">Cost: $50</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="dino-tab" class="tab-content">
-        <div style="text-align:center; width:100%; margin-top:50px;">
-            <h2>Dino Runner</h2>
-            <p>Press SPACE or Click to Jump!</p>
-            <div id="dino-game" onclick="dinoJump()">
-                <div id="dino"></div>
-                <div id="cactus" class="cactus"></div>
-            </div>
-            <h3 id="dino-score">Score: 0</h3>
+    <div id="tabDino" class="tab-content dino-view">
+        <h2>Dino Runner</h2>
+        <p>Press SPACE or CLICK to Jump</p>
+        <div id="gameArea" onclick="jump()">
+            <div id="dinoChar"></div>
+            <div id="cactusObj"></div>
         </div>
+        <h3 id="scoreText">Score: 0</h3>
     </div>
 
     <script>
-        // Tab switching logic
-        function showTab(tabName) {
+        // --- Tab Management ---
+        function switchTab(target) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            
-            if(tabName === 'clicker') {
-                document.getElementById('clicker').classList.add('active');
-                document.getElementById('btn1').classList.add('active');
+
+            if(target === 'clicker') {
+                document.getElementById('tabClicker').classList.add('active');
+                document.getElementById('navClicker').classList.add('active');
+                stopDino(); // Останавливаем дино, когда уходим
             } else {
-                document.getElementById('dino-tab').classList.add('active');
-                document.getElementById('btn2').classList.add('active');
-                startDino();
+                document.getElementById('tabDino').classList.add('active');
+                document.getElementById('navDino').classList.add('active');
+                startDino(); // Запускаем дино, когда заходим
             }
         }
 
         // --- Clicker Logic ---
-        let balance = 0;
-        let cpc = 1;
-        let cps
+        let money = 0;
+        let power = 1;
+        let income = 0;
+
+        const tapBtn = document.getElementById('tapBtn');
+        const balEl = document.getElementById('balance');
+
+        tapBtn.onclick = () => {
+            money += power;
+            refreshUI();
+        };
+
+        function buyItem(type, val, price) {
+            if (money >= price) {
+                money -= price;
+                if(type === 'click') power += val;
+                if(type === 'auto') income += val;
+                refreshUI();
+            }
+        }
+
+        function refreshUI() {
+            balEl.innerText = Math.floor(money);
+            document.getElementById('cpc').innerText = power;
+            document.getElementById('cps').innerText = income;
+            
+            // Кнопки магазина
+            document.getElementById('buyAuto').disabled = (money < 10);
+            document.getElementById('buyClick').disabled = (money < 50);
+        }
+
+        setInterval(() => {
+            if(income > 0) {
+                money += income;
+                refreshUI();
+            }
+        }, 1000);
+
+        // --- Dino Logic ---
+        const dino = document.getElementById('dinoChar');
+        const cactus = document.getElementById('cactusObj');
+        let dinoScore = 0;
+        let dinoInterval;
+
+        function jump() {
+            if (!dino.classList.contains('jump')) {
+                dino.classList.add('jump');
+                setTimeout(() => dino.classList.remove('jump'), 500);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.code === 'Space' && document.getElementById('tabDino').classList.contains('active')) {
+                jump();
+            }
+        });
+
+        function startDino() {
+            cactus.classList.add('cactus-move');
+            dinoScore = 0;
+            dinoInterval = setInterval(() => {
+                let dTop = parseInt(window.getComputedStyle(dino).getPropertyValue("top"));
+                let cLeft = parseInt(window.getComputedStyle(cactus).getPropertyValue("left"));
+
+                if(cLeft < 90 && cLeft > 50 && dTop >= 160) {
+                    alert("Game Over! Score: " + Math.floor(dinoScore));
+                    dinoScore = 0;
+                } else {
+                    dinoScore += 0.1;
+                    document.getElementById('scoreText').innerText = "Score: " + Math.floor(dinoScore);
+                }
+            }, 20);
+        }
+
+        function stopDino() {
+            cactus.classList.remove('cactus-move');
+            clearInterval(dinoInterval);
+        }
+
+        refreshUI(); // Start UI
+    </script>
+</body>
+</html>
