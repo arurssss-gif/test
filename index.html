@@ -5,64 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RUN - ULTIMATE CLICKER</title>
     <style>
-        :root { --accent: #00f2ff; --bg: #05070a; --panel: #0d1117; --gold: #ffcc00; }
+        :root { --accent: #00f2ff; --bg: #05070a; --panel: #0d1117; }
         body { 
             background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; 
             margin: 0; display: flex; height: 100vh; overflow: hidden; 
         }
         
-        /* Брендинг */
         .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 100px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; }
         .watermark { position: fixed; bottom: 20px; left: 20px; font-size: 20px; font-weight: bold; color: rgba(0,242,255,0.2); letter-spacing: 5px; }
 
-        /* Основная зона */
         .main { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
             background: radial-gradient(circle at center, #111821 0%, #05070a 100%);
         }
 
-        /* Магазин */
         .shop { 
             width: 380px; background: var(--panel); border-left: 2px solid #1f2937; 
             display: flex; flex-direction: column; padding: 20px; overflow-y: auto;
         }
 
-        /* Монета */
         #coin { 
             font-size: 160px; cursor: pointer; user-select: none; transition: transform 0.1s; 
             filter: drop-shadow(0 0 30px rgba(0,242,255,0.1)); margin: 20px;
         }
         #coin:active { transform: scale(0.85); }
 
-        /* Прогресс-бар */
         .xp-container { width: 350px; height: 14px; background: #161b22; border-radius: 20px; margin: 20px 0; border: 1px solid #30363d; overflow: hidden; }
-        #xp-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #7000ff); transition: 0.4s ease-out; }
+        #xp-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #7000ff); transition: 0.3s; }
 
-        /* Тексты */
-        h1#money { font-size: 70px; margin: 10px 0; color: white; text-shadow: 0 0 20px rgba(0,242,255,0.3); }
-        h2#lvl { color: var(--accent); letter-spacing: 2px; margin: 0; }
+        h1#money { font-size: 70px; margin: 10px 0; text-shadow: 0 0 20px rgba(0,242,255,0.3); }
+        h2#lvl { color: var(--accent); letter-spacing: 2px; }
 
-        /* Карточки магазина */
         .item { 
-            background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 12px; 
-            margin-bottom: 15px; transition: 0.3s;
+            background: #1c2128; border: 1px solid #30363d; padding: 15px; border-radius: 12px; 
+            margin-bottom: 12px;
         }
-        .item:hover { border-color: var(--accent); background: #1c2128; }
-        .item b { font-size: 16px; display: block; margin-bottom: 5px; }
+        .item b { display: block; margin-bottom: 8px; font-size: 16px; }
         .item button { 
-            width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; 
-            cursor: pointer; transition: 0.2s; background: #238636; color: white;
+            width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; 
+            cursor: pointer; background: #238636; color: white; transition: 0.2s;
         }
         .item button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-        .item button:not(:disabled):hover { background: #2ea043; transform: translateY(-2px); }
-
-        /* Уведомление */
-        #info { position: absolute; top: 50px; padding: 10px 25px; background: var(--accent); color: black; border-radius: 30px; font-weight: bold; opacity: 0; transition: 0.5s; }
+        
+        #msg { position: absolute; top: 40px; background: var(--accent); color: black; padding: 10px 25px; border-radius: 30px; font-weight: bold; opacity: 0; transition: 0.5s; z-index: 100; }
     </style>
 </head>
 <body>
 
-<div id="info">LEVEL UP!</div>
+<div id="msg">LEVEL UP!</div>
 <div class="side-run">RUN</div>
 <div class="watermark">arurs</div>
 
@@ -71,12 +61,13 @@
     <div class="xp-container"><div id="xp-bar"></div></div>
     <div id="coin" onclick="clickCoin()">🪙</div>
     <h1 id="money">$0</h1>
-    <p style="opacity: 0.5">Клик: +<span id="click-power">1</span></p>
+    <p>Клик: +<span id="click-power">1</span></p>
 </div>
 
 <div class="shop">
-    <h2 style="margin-bottom: 20px; text-align: center; color: var(--accent);">UPGRADES</h2>
-    <div id="items-list"></div>
+    <h2 style="text-align: center; color: var(--accent);">МАГАЗИН</h2>
+    <div id="items-list">
+        </div>
 </div>
 
 <script>
@@ -86,18 +77,17 @@
     let lvl = 1;
     let nextLvlXp = 100;
 
-    // Создаем 30 апгрейдов
+    // Генерируем 30 апгрейдов
     const upgrades = [];
     for (let i = 1; i <= 30; i++) {
         upgrades.push({
-            id: i,
             name: "Улучшение #" + i,
-            cost: Math.floor(15 * Math.pow(1.5, i)),
-            bonus: i * 2
+            cost: Math.floor(20 * Math.pow(1.5, i)),
+            bonus: i * 3
         });
     }
 
-    function clickCoin() {
+    window.clickCoin = function() {
         money += power;
         xp += 10;
         
@@ -106,24 +96,23 @@
             lvl++;
             nextLvlXp = Math.floor(nextLvlXp * 1.6);
             
-            // Эволюция монеты
             const coinEl = document.getElementById('coin');
             if (lvl >= 20) coinEl.innerText = "💎";
             else if (lvl >= 15) coinEl.innerText = "👑";
             else if (lvl >= 10) coinEl.innerText = "💰";
             else if (lvl >= 5) coinEl.innerText = "💵";
 
-            notify("НОВЫЙ УРОВЕНЬ: " + lvl);
+            showNotify("LEVEL UP: " + lvl);
         }
         updateUI();
     }
 
-    function buyUpgrade(idx) {
-        let u = upgrades[idx];
+    window.buyUpgrade = function(i) {
+        let u = upgrades[i];
         if (money >= u.cost) {
             money -= u.cost;
             power += u.bonus;
-            u.cost = Math.floor(u.cost * 1.8);
+            u.cost = Math.floor(u.cost * 1.7); // Цена растет
             updateUI();
         }
     }
@@ -132,12 +121,11 @@
         document.getElementById('money').innerText = "$" + Math.floor(money);
         document.getElementById('lvl').innerText = "LEVEL " + lvl;
         document.getElementById('click-power').innerText = power;
-        document.getElementById('xp-bar').style.width = (xp / nextXp * 100) + "%"; // Ошибка тут была, исправил:
         document.getElementById('xp-bar').style.width = (xp / nextLvlXp * 100) + "%";
 
         let html = "";
         upgrades.forEach((u, index) => {
-            let canBuy = money >= u.cost;
+            const canBuy = money >= u.cost;
             html += `
                 <div class="item">
                     <b>${u.name} <span style="color:var(--accent)">+${u.bonus}</span></b>
@@ -150,14 +138,13 @@
         document.getElementById('items-list').innerHTML = html;
     }
 
-    function notify(text) {
-        const el = document.getElementById('info');
-        el.innerText = text;
-        el.style.opacity = "1";
-        setTimeout(() => el.style.opacity = "0", 2000);
+    function showNotify(text) {
+        const el = document.getElementById('msg');
+        el.innerText = text; el.style.opacity = "1";
+        setTimeout(() => el.style.opacity = "0", 1500);
     }
 
-    // Первый запуск
+    // ВАЖНО: Запускаем отрисовку сразу при загрузке
     updateUI();
 </script>
 
