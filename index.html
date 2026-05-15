@@ -2,222 +2,157 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Artur's Ultimate Game Portal</title>
+    <title>Artur's Game Empire</title>
     <style>
-        :root { --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; --green: #22c55e; --text: #f8fafc; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Navigation */
         nav { background: var(--panel); display: flex; justify-content: center; gap: 10px; padding: 15px; border-bottom: 2px solid var(--accent); z-index: 1000; }
-        nav button { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        nav button { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         nav button.active { background: var(--accent); color: var(--bg); }
 
-        .tab { display: none; flex: 1; width: 100%; height: 100%; overflow: hidden; }
+        .tab { display: none; flex: 1; width: 100%; height: 100%; }
         .tab.active { display: flex; }
 
-        /* CLICKER LAYOUT */
-        .clicker-container { display: flex; width: 100%; height: 100%; }
-        .leaderboard { width: 250px; background: rgba(0,0,0,0.3); padding: 15px; border-right: 1px solid #334155; overflow-y: auto; }
-        .main-game { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .shop { width: 350px; background: var(--panel); padding: 15px; border-left: 1px solid #334155; overflow-y: auto; }
+        /* --- CLICKER --- */
+        .clicker-layout { display: flex; width: 100%; height: 100%; }
+        .side { width: 250px; background: rgba(0,0,0,0.2); padding: 15px; overflow-y: auto; font-size: 14px; }
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .shop { width: 350px; background: var(--panel); padding: 15px; overflow-y: auto; border-left: 1px solid #334155; }
+        #asset { font-size: 100px; cursor: pointer; user-select: none; transition: 0.1s; }
+        #asset:active { transform: scale(0.8); }
+        .upg-card { background: #2d3748; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #4a5568; }
+        .upg-card button { width: 100%; background: #22c55e; border: none; color: white; padding: 8px; border-radius: 5px; cursor: pointer; margin-top: 5px; }
+        .upg-card button:disabled { background: #4a5568; opacity: 0.5; }
+        .xp-bg { width: 250px; height: 15px; background: #334155; border-radius: 10px; margin: 10px; overflow: hidden; }
+        #xpFill { width: 0%; height: 100%; background: var(--accent); }
 
-        /* Progress Bar */
-        .lv-container { width: 300px; background: #334155; height: 25px; border-radius: 15px; overflow: hidden; margin: 10px 0; border: 2px solid #475569; }
-        #xpBar { width: 0%; height: 100%; background: linear-gradient(90deg, #fbbf24, #f59e0b); transition: 0.3s; }
+        /* --- DINO --- */
+        #dinoBox { width: 600px; height: 200px; background: #1e293b; border-bottom: 4px solid white; position: relative; overflow: hidden; margin: auto; }
+        #dinoObj { position: absolute; bottom: 0; left: 50px; font-size: 45px; transform: scaleX(-1); z-index: 2; }
+        .cactus { position: absolute; bottom: 0; right: -50px; font-size: 35px; }
 
-        #asset { font-size: 100px; cursor: pointer; user-select: none; transition: transform 0.1s; filter: drop-shadow(0 0 20px rgba(251,191,36,0.2)); }
-        #asset:active { transform: scale(0.85); }
-
-        .upgrade-card { background: #2d3748; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #4a5568; }
-        .upgrade-card button { width: 100%; background: var(--green); border: none; color: white; padding: 5px; border-radius: 4px; cursor: pointer; margin-top: 5px; }
-        .upgrade-card button:disabled { background: #4a5568; cursor: not-allowed; }
-
-        /* DINO & JUMP */
-        .game-canvas { margin: auto; position: relative; border: 4px solid white; background: #1e293b; overflow: hidden; }
-        #dinoHero { position: absolute; bottom: 0; left: 50px; font-size: 40px; transform: scaleX(-1); }
-        #cactus { position: absolute; bottom: 0; right: -50px; font-size: 35px; }
-        #mosquito { position: absolute; font-size: 30px; width: 30px; height: 30px; }
-        .cloud { position: absolute; width: 70px; height: 15px; background: white; border-radius: 10px; }
-        
-        .jump-anim { animation: jKey 0.6s ease-out; }
-        @keyframes jKey { 0%, 100% { bottom: 0; } 50% { bottom: 120px; } }
-
-        .lb-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #334155; font-size: 13px; }
-        .lb-item.me { color: var(--accent); font-weight: bold; }
+        /* --- JUMP --- */
+        #jumpBox { width: 350px; height: 500px; background: #0ea5e9; border: 5px solid white; position: relative; overflow: hidden; margin: auto; }
+        #flyer { position: absolute; font-size: 35px; width: 40px; height: 40px; z-index: 5; }
+        .plt { position: absolute; width: 70px; height: 15px; background: white; border-radius: 10px; box-shadow: 0 4px #0284c7; }
     </style>
 </head>
 <body>
 
 <nav>
-    <button onclick="st('c')" id="nc" class="active">ULTRA CLICKER</button>
-    <button onclick="st('d')" id="nd">REX RUN</button>
+    <button onclick="st('c')" id="nc" class="active">CLICKER</button>
+    <button onclick="st('d')" id="nd">DINO REX</button>
     <button onclick="st('j')" id="nj">MOSQUITO</button>
 </nav>
 
 <div id="tc" class="tab active">
-    <div class="clicker-container">
-        <div class="leaderboard">
-            <h3 style="color:var(--accent)">Top 100 Players</h3>
-            <div id="lbList"></div>
-        </div>
-        <div class="main-game">
-            <h2 id="lvText">Level 1: Novice</h2>
-            <div class="lv-container"><div id="xpBar"></div></div>
+    <div class="clicker-layout">
+        <div class="side"><h3>Leaderboard</h3><div id="lb"></div></div>
+        <div class="main">
+            <h2 id="lvT">Level 1</h2>
+            <div class="xp-bg"><div id="xpFill"></div></div>
             <div id="asset" onclick="tap()">🪙</div>
             <h1 id="bal">$0</h1>
-            <p>Click: +<span id="cpcVal">1</span> | Sec: +<span id="cpsVal">0</span></p>
+            <p>CPC: <span id="cpc">1</span> | CPS: <span id="cps">0</span></p>
         </div>
-        <div class="shop">
-            <h3 style="color:var(--accent)">Upgrades</h3>
-            <div id="shopList"></div>
-        </div>
+        <div class="shop"><h3>Upgrades</h3><div id="sl"></div></div>
     </div>
 </div>
 
-<div id="td" class="tab">
-    <div class="main-game">
-        <h2 id="dScore">Score: 0</h2>
-        <div class="game-canvas" id="dBox" style="width: 600px; height: 200px;" onclick="dj()">
-            <div id="dinoHero">🦖</div>
-            <div id="cactus">🌵</div>
-        </div>
-    </div>
-</div>
+<div id="td" class="tab"><div class="main"><h2>Score: <span id="ds">0</span></h2><div id="dinoBox" onclick="dj()"><div id="dinoObj">🦖</div></div></div></div>
 
-<div id="tj" class="tab">
-    <div class="main-game">
-        <h2 id="jScore">Height: 0</h2>
-        <div class="game-canvas" id="jBox" style="width: 350px; height: 500px;">
-            <div id="mosquito">🦟</div>
-        </div>
-    </div>
-</div>
+<div id="tj" class="tab"><div class="main"><h2>Height: <span id="js">0</span></h2><div id="jumpBox"><div id="flyer">🦟</div></div></div></div>
 
 <script>
-    // --- DATABASE & STATE ---
-    let s = { b: 0, cp: 1, cs: 0, xp: 0, lv: 1, name: "Artur (You)" };
-    let upgs = [];
-    for(let i=1; i<=20; i++) { 
-        upgs.push({ n: "Upgrade #"+i, c: Math.floor(10 * Math.pow(1.6, i)), p: Math.floor(2 * i), type: i%2===0?'c':'s' });
-    }
+let state = { b: 0, cp: 1, cs: 0, xp: 0, lv: 1 };
+let items = [];
+for(let i=1; i<=30; i++) items.push({ n: "Tech #"+i, c: Math.floor(15 * Math.pow(1.8, i/1.5)), p: i*2, t: i%2===0?'c':'s' });
 
-    // --- TAB SYSTEM ---
-    function st(t) {
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
-        document.getElementById('t'+t).classList.add('active');
-        document.getElementById('n'+t).classList.add('active');
-        if(t === 'd') initD(); else dOff();
-        if(t === 'j') initJ(); else jOff();
-    }
+function st(t) {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
+    document.getElementById('t'+t).classList.add('active');
+    document.getElementById('n'+t).classList.add('active');
+    if(t==='d') initD(); else clearInterval(dI);
+    if(t==='j') initJ(); else clearInterval(jI);
+}
 
-    // --- CLICKER ---
-    function tap() {
-        s.b += s.cp; s.xp += 10;
-        if(s.xp >= 100) { s.xp = 0; s.lv++; }
-        updateUI();
-    }
+// CLICKER
+function tap() { state.b += state.cp; state.xp += 10; if(state.xp>=100){state.xp=0; state.lv++;} update(); }
+function buy(i) { let u = items[i]; if(state.b >= u.c){ state.b -= u.c; if(u.t==='c')state.cp+=u.p; else state.cs+=u.p; u.c = Math.floor(u.c*2); update();}}
+function update() {
+    document.getElementById('bal').innerText = "$"+Math.floor(state.b);
+    document.getElementById('cpc').innerText = state.cp;
+    document.getElementById('cps').innerText = state.cs;
+    document.getElementById('xpFill').style.width = state.xp+"%";
+    document.getElementById('lvT').innerText = "Level "+state.lv;
+    let icons = ["🪙","💵","💰","💎","👑","🏦","🏛️"];
+    document.getElementById('asset').innerText = icons[Math.min(state.lv-1, 6)];
+    let h = ""; items.forEach((u,i) => {
+        h += <div class="upg-card"><b>${u.n}</b> (+${u.p} ${u.t==='c'?'Click':'Sec'})<br><button onclick="buy(${i})" ${state.b < u.c ? 'disabled':''}>Buy: $${u.c}</button></div>;
+    });
+    document.getElementById('sl').innerHTML = h;
+    let lb = ""; for(let i=0; i<10; i++) lb += <div>${i+1}. Player_${i+5} - $${(10-i)*100}</div>;
+    document.getElementById('lb').innerHTML = lb;
+}
+setInterval(() => { if(state.cs>0){state.b += state.cs; update();} }, 1000);
 
-    function buy(i) {
-        let u = upgs[i];
-        if(s.b >= u.c) {
-            s.b -= u.c;
-            if(u.type === 'c') s.cp += u.p; else s.cs += u.p;
-            u.c = Math.floor(u.c * 1.4);
-            updateUI();
+// DINO
+let dI, dS=0, dSpd=5, isJ=false;
+function dj() { if(!isJ){ isJ=true; let d = document.getElementById('dinoObj'); d.style.transition="0.4s"; d.style.bottom="120px"; setTimeout(()=>{d.style.bottom="0px"; setTimeout(()=>isJ=false,400)},400);}}
+function initD() {
+    dS=0; dSpd=6; document.querySelectorAll('.cactus').forEach(c=>c.remove());
+    dI = setInterval(() => {
+        if(Math.random() < 0.02) {
+            let c = document.createElement('div'); c.className='cactus'; c.innerText = Math.random()>0.5?'🌵':'🌵🌵';
+            c.style.right = "-50px"; document.getElementById('dinoBox').appendChild(c);
         }
-    }
-
-    function updateUI() {
-        document.getElementById('bal').innerText = "$"+Math.floor(s.b);
-        document.getElementById('cpcVal').innerText = s.cp;
-        document.getElementById('cpsVal').innerText = s.cs;
-        document.getElementById('xpBar').style.width = s.xp+"%";
-        document.getElementById('lvText').innerText = "Level " + s.lv;
-        
-        let assets = ["🪙","💵","💰","💎","👑","🏦","🏛️"];
-        document.getElementById('asset').innerText = assets[Math.min(s.lv-1, 6)];
-
-        // Shop Render
-        let h = "";
-        upgs.forEach((u, i) => {
-            h += `<div class="upgrade-card">
-                <b>${u.n}</b> (+${u.p} ${u.type==='c'?'Click':'Sec'})<br>
-                <button onclick="buy(${i})" ${s.b < u.c ? 'disabled':''}>Buy: $${u.c}</button>
-            </div>`;
+        document.querySelectorAll('.cactus').forEach(c => {
+            let r = parseInt(c.style.right); c.style.right = (r + dSpd) + "px";
+            let d = document.getElementById('dinoObj');
+            let dBot = parseInt(window.getComputedStyle(d).bottom);
+            if(r > 500 && r < 550 && dBot < 40) { alert("Game Over!"); initD(); }
+            if(r > 650) c.remove();
         });
-        document.getElementById('shopList').innerHTML = h;
-        updateLB();
-    }
+        dS++; dSpd += 0.001; document.getElementById('ds').innerText = Math.floor(dS/10);
+    }, 20);
+}
 
-    // Leaderboard Simulation
-    function updateLB() {
-        let players = [{n: s.name, v: s.b}];
-        for(let i=0; i<15; i++) players.push({n: "Player_"+(i+1), v: (15-i)*500});
-        players.sort((a,b) => b.v - a.v);
-        let h = "";
-        players.forEach((p, i) => {
-            h += `<div class="lb-item ${p.n === s.name ? 'me':''}">
-                <span>${i+1}. ${p.n}</span> <span>$${Math.floor(p.v)}</span>
-            </div>`;
+// JUMP
+let jI, jX=150, jY=50, jV=0, plts=[], js=0, isHolding=false;
+function initJ() {
+    jX=150; jY=50; jV=0; js=0; plts=[];
+    const b = document.getElementById('jumpBox'); b.innerHTML='<div id="flyer">🦟</div>';
+    for(let i=0; i<8; i++) spawnP(i*70);
+    jI = setInterval(() => {
+        jV -= 0.3; if(isHolding) jV += 0.6; // Jetpack effect
+        jY += jV;
+        plts.forEach(p => {
+            if(jV < 0 && jX > p.x-30 && jX < p.x+60 && jY > p.y && jY < p.y+15) { jV = 8; js++; }
+            if(jY > 200) { p.y -= jV; p.e.style.bottom = p.y+'px'; }
+            if(p.y < -20) { p.y = 550; p.x = Math.random()*280; p.e.style.left = p.x+'px'; }
         });
-        document.getElementById('lbList').innerHTML = h;
-    }
+        if(jY < -50) initJ();
+        let f = document.getElementById('flyer'); f.style.left=jX+'px'; f.style.bottom=Math.min(jY,200)+'px';
+        document.getElementById('js').innerText = js;
+    }, 20);
+}
+function spawnP(y) {
+    let x = Math.random()*280; let e = document.createElement('div'); e.className='plt';
+    e.style.left=x+'px'; e.style.bottom=y+'px'; document.getElementById('jumpBox').appendChild(e);
+    plts.push({x, y, e});
+}
 
-    setInterval(() => { if(s.cs > 0) { s.b += s.cs; updateUI(); } }, 1000);
+window.onkeydown = (e) => { 
+    if(e.key==="ArrowLeft") jX-=15; if(e.key==="ArrowRight") jX+=15; 
+    if(e.key==="ArrowUp" || e.key===" ") { isHolding=true; dj(); }
+};
+window.onkeyup = (e) => { if(e.key==="ArrowUp" || e.key===" ") isHolding=false; };
+window.onmousedown = () => isHolding = true;
+window.onmouseup = () => isHolding = false;
 
-    // --- DINO LOGIC ---
-    let dInt, dSpd = 5, dSc = 0;
-    function dj() { let h = document.getElementById('dinoHero'); if(!h.classList.contains('jump-anim')) { h.classList.add('jump-anim'); setTimeout(()=>h.classList.remove('jump-anim'), 600); } }
-    function initD() {
-        dSc = 0; dSpd = 6;
-        let c = document.getElementById('cactus');
-        dInt = setInterval(() => {
-            let cl = parseInt(window.getComputedStyle(c).left);
-            let dt = parseInt(window.getComputedStyle(document.getElementById('dinoHero')).top);
-            if(cl < 90 && cl > 50 && dt > 140) { alert("Game Over! Score: "+dSc); dSc = 0; dSpd = 6; }
-            else { dSc++; dSpd += 0.002; document.getElementById('dScore').innerText = "Score: "+dSc; }
-            let r = parseInt(c.style.right || -50);
-            if(r > 650) c.style.right = "-50px"; else c.style.right = (r + dSpd) + "px";
-        }, 20);
-    }
-    function dOff() { clearInterval(dInt); }
-
-    // --- JUMP LOGIC (MOSQUITO) ---
-    let jInt, jX=150, jY=100, jV=0, jPlats = [], jS=0;
-    function initJ() {
-        jX=150; jY=100; jV=0; jS=0;
-        const b = document.getElementById('jBox');
-        b.innerHTML = '<div id="mosquito">🦟</div>';
-        jPlats = [];
-        for(let i=0; i<7; i++) {
-            let x = Math.random()*280, y = i*80;
-            let p = document.createElement('div'); p.className='cloud'; p.style.left=x+'px'; p.style.bottom=y+'px';
-            b.appendChild(p); jPlats.push({x, y, el: p});
-        }
-        jInt = setInterval(() => {
-            jV -= 0.3; jY += jV;
-            let m = document.getElementById('mosquito');
-            jPlats.forEach(p => {
-                if(jV < 0 && jX > p.x-30 && jX < p.x+60 && jY > p.y && jY < p.y+15) { jV = 10; jS++; }
-                if(jY > 250) { p.y -= jV; p.el.style.bottom = p.y+'px'; }
-                if(p.y < -20) { p.y = 550; p.x = Math.random()*280; p.el.style.left = p.x+'px'; }
-            });
-            if(jY < -50) { alert("Died! Score: "+jS); initJ(); }
-            m.style.left = jX+'px'; m.style.bottom = Math.min(jY, 250)+'px';
-            document.getElementById('jScore').innerText = "Height: "+jS;
-        }, 20);
-    }
-    function jOff() { clearInterval(jInt); }
-
-    // Controls
-    window.onkeydown = (e) => {
-        if(e.key === "ArrowLeft") jX -= 20;
-        if(e.key === "ArrowRight") jX += 20;
-        if(e.key === " ") dj();
-    };
-
-    updateUI();
+update();
 </script>
 </body>
 </html>
