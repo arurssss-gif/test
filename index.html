@@ -2,307 +2,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artur's Game Hub</title>
+    <title>Artur's Ultimate Game Hub</title>
     <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --accent: #fbbf24;
-            --text: #f8fafc;
-        }
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        
+        nav { background: var(--panel); display: flex; justify-content: center; gap: 10px; padding: 10px; border-bottom: 2px solid var(--accent); }
+        nav button { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        nav button.active { background: var(--accent); color: var(--bg); }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
+        .tab-content { display: none; flex: 1; position: relative; width: 100%; height: 100%; }
+        .tab-content.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-        /* Navigation */
-        nav {
-            background: var(--panel);
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 15px;
-            border-bottom: 2px solid var(--accent);
-            z-index: 100;
-        }
+        /* --- Clicker --- */
+        #tapBtn { width: 180px; height: 180px; border-radius: 50%; background: orange; border: none; font-size: 50px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        #tapBtn:active { transform: scale(0.9); }
 
-        nav button {
-            background: transparent;
-            border: 2px solid var(--accent);
-            color: var(--accent);
-            padding: 10px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
+        /* --- Dino --- */
+        #dinoWindow { width: 600px; height: 200px; border-bottom: 3px solid white; position: relative; overflow: hidden; background: #243447; }
+        #dinoObj { position: absolute; bottom: 0; left: 50px; font-size: 40px; width: 40px; height: 40px; }
+        #cactusObj { position: absolute; bottom: 0; right: -50px; font-size: 30px; }
+        .jump { animation: jumpAnim 0.6s ease-out; }
+        @keyframes jumpAnim { 0%, 100% { bottom: 0; } 50% { bottom: 120px; } }
+        .cactus-run { animation: moveCactus 1.8s infinite linear; }
+        @keyframes moveCactus { 0% { right: -50px; } 100% { right: 650px; } }
 
-        nav button.active {
-            background: var(--accent);
-            color: var(--bg);
-        }
-
-        /* Tab Management */
-        .tab-content {
-            display: none;
-            flex: 1;
-            width: 100%;
-        }
-
-        .tab-content.active {
-            display: flex;
-        }
-
-        /* --- Clicker Game Layout --- */
-        .clicker-view {
-            display: flex;
-            width: 100%;
-            height: 100%;
-        }
-
-        .main-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #tapBtn {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #fbbf24, #d97706);
-            border: none;
-            cursor: pointer;
-            font-size: 28px;
-            font-weight: bold;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: transform 0.05s;
-        }
-
-        #tapBtn:active { transform: scale(0.92); }
-
-        .sidebar {
-            width: 320px;
-            background: var(--panel);
-            padding: 20px;
-            border-left: 1px solid #334155;
-        }
-
-        .shop-item {
-            background: #334155;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .buy-btn {
-            width: 100%;
-            padding: 10px;
-            background: #22c55e;
-            border: none;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .buy-btn:disabled { background: #64748b; opacity: 0.5; }
-
-        /* --- Dino Game Style --- */
-        .dino-view {
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #gameArea {
-            width: 600px;
-            height: 200px;
-            border-bottom: 3px solid white;
-            background: #1e293b;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #dinoChar {
-            width: 40px;
-            height: 40px;
-            background: #fbbf24;
-            position: absolute;
-            bottom: 0;
-            left: 50px;
-        }
-
-        #cactusObj {
-            width: 25px;
-            height: 45px;
-            background: #ef4444;
-            position: absolute;
-            bottom: 0;
-            right: -30px;
-        }
-
-        .jump { animation: jumpAnim 0.5s linear; }
-        @keyframes jumpAnim {
-            0% { bottom: 0; }
-            30% { bottom: 100px; }
-            70% { bottom: 100px; }
-            100% { bottom: 0; }
-        }
-
-        .cactus-move { animation: moveAnim 1.5s infinite linear; }
-        @keyframes moveAnim {
-            0% { right: -30px; }
-            100% { right: 630px; }
-        }
+        /* --- Cloud Jump --- */
+        #jumpWindow { width: 350px; height: 500px; background: #38bdf8; border: 4px solid white; position: relative; overflow: hidden; }
+        #mosquito { position: absolute; width: 30px; height: 30px; font-size: 25px; bottom: 50px; left: 160px; }
+        .platform { position: absolute; width: 60px; height: 10px; background: white; border-radius: 5px; font-size: 10px; text-align: center; color: #38bdf8; }
     </style>
 </head>
 <body>
 
-    <nav>
-        <button id="navClicker" class="active" onclick="switchTab('clicker')">CLICKER</button>
-        <button id="navDino" onclick="switchTab('dino')">DINO RUN</button>
-    </nav>
+<nav>
+    <button id="n1" class="active" onclick="switchTab('click')">CLICKER</button>
+    <button id="n2" onclick="switchTab('dino')">DINO</button>
+    <button id="n3" onclick="switchTab('jump')">CLOUD JUMP</button>
+</nav>
 
-    <div id="tabClicker" class="tab-content active">
-        <div class="clicker-view">
-            <div class="main-area">
-                <h1 style="font-size: 3rem; color: var(--accent); margin: 0;">$<span id="balance">0</span></h1>
-                <p>Click: +<span id="cpc">1</span> | Idle: +<span id="cps">0</span>/s</p>
-                <button id="tapBtn">TAP</button>
-                <a href="https://www.tiktok.com/@uunbra" target="_blank" style="color:#38bdf8; margin-top:20px; text-decoration:none;">My TikTok</a>
-            </div>
-            <div class="sidebar">
-                <h2 style="border-bottom:1px solid #444; padding-bottom:10px;">Store</h2>
-                <div class="shop-item">
-                    <span>Automation (+1/s)</span>
-                    <button id="buyAuto" class="buy-btn" onclick="buyItem('auto', 1, 10)">Cost: $10</button>
-                </div>
-                <div class="shop-item">
-                    <span>Power (+1 Click)</span>
-                    <button id="buyClick" class="buy-btn" onclick="buyItem('click', 1, 50)">Cost: $50</button>
-                </div>
-            </div>
-        </div>
+<div id="click" class="tab-content active">
+    <h1>Balance: $<span id="bal">0</span></h1>
+    <button id="tapBtn" onclick="tap()">🪙</button>
+    <p>Click: +<span id="cpc">1</span></p>
+    <button onclick="buy(10)">Upgrade Click ($10)</button>
+</div>
+
+<div id="dino" class="tab-content">
+    <h2>Dino Run 🦖</h2>
+    <div id="dinoWindow" onclick="dinoJump()">
+        <div id="dinoObj">🦖</div>
+        <div id="cactusObj">🌵</div>
     </div>
+    <p>Click or Space to jump! Score: <span id="dScore">0</span></p>
+</div>
 
-    <div id="tabDino" class="tab-content dino-view">
-        <h2>Dino Runner</h2>
-        <p>Press SPACE or CLICK to Jump</p>
-        <div id="gameArea" onclick="jump()">
-            <div id="dinoChar"></div>
-            <div id="cactusObj"></div>
+<div id="jump" class="tab-content">
+    <h2>Cloud Jump 🦟</h2>
+    <div id="jumpWindow">
+        <div id="mosquito">🦟</div>
         </div>
-        <h3 id="scoreText">Score: 0</h3>
-    </div>
+    <p>Use Left/Right Arrows! Score: <span id="jScore">0</span></p>
+</div>
 
-    <script>
-        // --- Tab Management ---
-        function switchTab(target) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+<script>
+    let balance = 0, cpc = 1;
+    function tap() { balance += cpc; document.getElementById('bal').innerText = balance; }
+    function buy(cost) { if(balance >= cost) { balance -= cost; cpc++; tap(); } }
 
-            if(target === 'clicker') {
-                document.getElementById('tabClicker').classList.add('active');
-                document.getElementById('navClicker').classList.add('active');
-                stopDino(); // Останавливаем дино, когда уходим
-            } else {
-                document.getElementById('tabDino').classList.add('active');
-                document.getElementById('navDino').classList.add('active');
-                startDino(); // Запускаем дино, когда заходим
-            }
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'dino') startDino(); else stopDino();
+        if(id === 'jump') startJump();
+    }
+
+    // --- Dino Logic ---
+    let dInt;
+    function dinoJump() { 
+        let d = document.getElementById('dinoObj');
+        if(!d.classList.contains('jump')) { d.classList.add('jump'); setTimeout(()=>d.classList.remove('jump'), 600); }
+    }
+    function startDino() {
+        const cac = document.getElementById('cactusObj');
+        cac.style.display = "block";
+        cac.classList.add('cactus-run');
+        let score = 0;
+        dInt = setInterval(() => {
+            let d = document.getElementById('dinoObj'), c = document.getElementById('cactusObj');
+            let dT = parseInt(window.getComputedStyle(d).top), cL = parseInt(window.getComputedStyle(c).left);
+            if(cL < 90 && cL > 50 && dT >= 150) {
+                alert("Game Over!"); cac.classList.remove('cactus-run'); cac.style.display = "none";
+            } else { score++; document.getElementById('dScore').innerText = Math.floor(score/10); }
+        }, 20);
+    }
+    function stopDino() { clearInterval(dInt); document.getElementById('cactusObj').classList.remove('cactus-run'); }
+
+    // --- Cloud Jump (Mosquito) ---
+    let mPos = {x: 160, y: 50}, mVel = 0, jScore = 0;
+    function startJump() {
+        const win = document.getElementById('jumpWindow');
+        win.innerHTML = '<div id="mosquito">🦟</div>';
+        let plats = [];
+        for(let i=0; i<6; i++) {
+            let p = {x: Math.random()*280, y: i*100};
+            plats.push(p);
+            let div = document.createElement('div'); div.className = 'platform';
+            div.style.left = p.x+'px'; div.style.bottom = p.y+'px'; div.innerText = "☁️";
+            win.appendChild(div);
         }
-
-        // --- Clicker Logic ---
-        let money = 0;
-        let power = 1;
-        let income = 0;
-
-        const tapBtn = document.getElementById('tapBtn');
-        const balEl = document.getElementById('balance');
-
-        tapBtn.onclick = () => {
-            money += power;
-            refreshUI();
-        };
-
-        function buyItem(type, val, price) {
-            if (money >= price) {
-                money -= price;
-                if(type === 'click') power += val;
-                if(type === 'auto') income += val;
-                refreshUI();
-            }
-        }
-
-        function refreshUI() {
-            balEl.innerText = Math.floor(money);
-            document.getElementById('cpc').innerText = power;
-            document.getElementById('cps').innerText = income;
-            
-            // Кнопки магазина
-            document.getElementById('buyAuto').disabled = (money < 10);
-            document.getElementById('buyClick').disabled = (money < 50);
-        }
-
-        setInterval(() => {
-            if(income > 0) {
-                money += income;
-                refreshUI();
-            }
-        }, 1000);
-
-        // --- Dino Logic ---
-        const dino = document.getElementById('dinoChar');
-        const cactus = document.getElementById('cactusObj');
-        let dinoScore = 0;
-        let dinoInterval;
-
-        function jump() {
-            if (!dino.classList.contains('jump')) {
-                dino.classList.add('jump');
-                setTimeout(() => dino.classList.remove('jump'), 500);
-            }
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if(e.code === 'Space' && document.getElementById('tabDino').classList.contains('active')) {
-                jump();
-            }
-        });
-
-        function startDino() {
-            cactus.classList.add('cactus-move');
-            dinoScore = 0;
-            dinoInterval = setInterval(() => {
-                let dTop = parseInt(window.getComputedStyle(dino).getPropertyValue("top"));
-                let cLeft = parseInt(window.getComputedStyle(cactus).getPropertyValue("left"));
-
-                if(cLeft < 90 && cLeft > 50 && dTop >= 160) {
-                    alert("Game Over! Score: " + Math.floor(dinoScore));
-                    dinoScore = 0;
-                } else {
-                    dinoScore += 0.1;
-                    document.getElementById('scoreText').innerText = "Score: " + Math.floor(dinoScore);
-                }
-            }, 20);
-        }
-
-        function stopDino() {
-            cactus.classList.remove('cactus-move');
-            clearInterval(dinoInterval);
-        }
-
-        refreshUI(); // Start UI
-    </script>
+        // Basic physics would go here (gravity/keys) - keeping it light for now
+    }
+    
+    document.addEventListener('keydown', (e) => { if(e.code === 'Space') dinoJump(); });
+</script>
 </body>
 </html>
