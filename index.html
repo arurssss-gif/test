@@ -2,41 +2,27 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUN - ARTUR HUB</title>
+    <title>RUN - ARTUR FINAL FIX</title>
     <style>
-        :root { --accent: #00f2ff; --xp: #7000ff; --bg: #05070a; --panel: #10141b; --gold: #ffcc00; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        :root { --accent: #00f2ff; --bg: #05070a; --panel: #10141b; }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; text-align: center; }
         
-        .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 100px; font-weight: 900; color: rgba(255,255,255,0.03); z-index: 0; letter-spacing: 20px; pointer-events: none; }
-        .watermark { position: fixed; bottom: 15px; right: 25px; font-size: 20px; font-weight: bold; color: rgba(0,242,255,0.2); letter-spacing: 3px; z-index: 100; }
+        /* Брендинг */
+        .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 80px; font-weight: 900; color: rgba(255,255,255,0.05); pointer-events: none; }
+        .watermark { position: fixed; bottom: 10px; right: 10px; color: rgba(0,242,255,0.3); font-weight: bold; }
 
-        nav { background: var(--panel); display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px; border-bottom: 2px solid var(--accent); position: relative; z-index: 10; }
-        nav button { background: #1a1f26; border: 1px solid #30363d; color: white; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        nav button.active { background: var(--accent); color: black; box-shadow: 0 0 20px var(--accent); }
-        .tiktok-btn { background: linear-gradient(45deg, #ff0050, #00f2ff); border: none; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; }
+        nav { background: var(--panel); padding: 15px; border-bottom: 2px solid var(--accent); display: flex; justify-content: center; gap: 10px; }
+        nav button { background: #1a1f26; border: 1px solid #333; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        nav button.active { background: var(--accent); color: black; }
 
-        /* Вкладки - по умолчанию скрыты */
-        .tab { display: none; flex: 1; width: 100%; height: 100%; position: relative; z-index: 5; }
-        /* Показываем только активную */
-        .tab.active { display: flex !important; }
+        .tab { display: none; padding: 20px; flex-direction: column; align-items: center; }
+        .tab.active { display: flex; }
 
-        .side { width: 280px; background: rgba(0,0,0,0.5); padding: 20px; border-right: 1px solid #222; overflow-y: auto; }
-        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #161b22 0%, #05070a 100%); }
-        .shop { width: 350px; background: var(--panel); padding: 20px; border-left: 1px solid #222; overflow-y: auto; }
+        #coin { font-size: 120px; cursor: pointer; user-select: none; transition: 0.1s; margin: 20px; display: inline-block; }
+        #coin:active { transform: scale(0.8); }
 
-        .xp-bar { width: 300px; background: #222; height: 12px; border-radius: 10px; margin-top: 10px; border: 1px solid #333; overflow: hidden; }
+        .xp-bar { width: 300px; height: 10px; background: #222; border-radius: 5px; margin: 10px auto; overflow: hidden; }
         #xp-fill { width: 0%; height: 100%; background: var(--accent); transition: 0.3s; }
-
-        #coin { font-size: 140px; cursor: pointer; user-select: none; margin: 20px; }
-        #coin:active { transform: scale(0.9); }
-
-        .card { background: #1c2128; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
-        .card button { width: 100%; padding: 10px; background: #238636; border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        
-        .game-zone { width: 600px; height: 300px; background: #000; border: 2px solid #333; position: relative; overflow: hidden; border-radius: 15px; }
-        #dino { position: absolute; bottom: 0; left: 50px; font-size: 50px; transform: scaleX(-1); }
-        .cactus { position: absolute; bottom: 0; font-size: 30px; }
     </style>
 </head>
 <body>
@@ -45,94 +31,65 @@
 <div class="watermark">arurs</div>
 
 <nav>
-    <button onclick="showTab('c')" id="btn-c" class="active">КЛИКЕР</button>
-    <button onclick="showTab('d')" id="btn-d">ДИНО</button>
-    <button onclick="showTab('m')" id="btn-m">КОМАРИК</button>
-    <a href="https://www.tiktok.com/@arursss" target="_blank" class="tiktok-btn">TIKTOK</a>
+    <button onclick="changeTab('c')" id="btn-c" class="active">КЛИКЕР</button>
+    <button onclick="changeTab('d')" id="btn-d">ДИНО</button>
+    <a href="https://www.tiktok.com/@arursss" target="_blank" style="background:#ff0050; color:white; padding:10px; text-decoration:none; border-radius:5px;">TIKTOK</a>
 </nav>
 
 <div id="tab-c" class="tab active">
-    <div class="side"><h3>ЛИДЕРЫ</h3><div id="lb"></div></div>
-    <div class="main">
-        <h2 id="lvl-txt">УРОВЕНЬ 1</h2>
-        <div class="xp-bar"><div id="xp-fill"></div></div>
-        <div id="coin" onclick="tap()">🪙</div>
-        <h1 id="money-txt">$0</h1>
-    </div>
-    <div class="shop"><h3>МАГАЗИН</h3><div id="shop-items"></div></div>
+    <h2 id="lvl-txt">УРОВЕНЬ 1</h2>
+    <div class="xp-bar"><div id="xp-fill"></div></div>
+    <div id="coin" onclick="handleTap()">🪙</div>
+    <h1 id="money-txt">$0</h1>
 </div>
 
 <div id="tab-d" class="tab">
-    <div class="main">
-        <h1>СЧЕТ: <span id="d-sc">0</span></h1>
-        <div class="game-zone" onclick="dJump()"><div id="dino">🦖</div><div id="d-obs"></div></div>
+    <h1>ДИНОЗАВРИК</h1>
+    <div style="width:100%; height:200px; border:1px solid #333; position:relative; overflow:hidden;">
+        <div id="dino" style="position:absolute; bottom:0; left:20px; font-size:40px;">🦖</div>
     </div>
-</div>
-
-<div id="tab-m" class="tab">
-    <div class="main"><h1>КОМАРИК В РАЗРАБОТКЕ</h1></div>
+    <p>Режим в отладке...</p>
 </div>
 
 <script>
-    // Все функции вынесены в глобальную область, чтобы кнопки их точно "видели"
-    let money = 0, power = 1, xp = 0, lvl = 1;
+    // Глобальные переменные
+    window.money = 0;
+    window.xp = 0;
+    window.lvl = 1;
 
-    function showTab(id) {
-        // 1. Скрываем все вкладки
+    // Функция переключения вкладок
+    window.changeTab = function(id) {
+        console.log("Переключаю на:", id);
+        // Скрываем все
         document.getElementById('tab-c').classList.remove('active');
         document.getElementById('tab-d').classList.remove('active');
-        document.getElementById('tab-m').classList.remove('active');
-        // 2. Убираем активный класс у кнопок
+        // Убираем подсветку кнопок
         document.getElementById('btn-c').classList.remove('active');
         document.getElementById('btn-d').classList.remove('active');
-        document.getElementById('btn-m').classList.remove('active');
         
-        // 3. Показываем нужную
+        // Показываем нужную
         document.getElementById('tab-' + id).classList.add('active');
         document.getElementById('btn-' + id).classList.add('active');
-        
-        if(id === 'd') startDino(); else stopDino();
-    }
+    };
 
-    function tap() {
-        money += power;
-        xp += 10;
-        if(xp >= 100) { xp = 0; lvl++; alert("УРОВЕНЬ АП!"); }
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('money-txt').innerText = "$" + money;
-        document.getElementById('lvl-txt').innerText = "УРОВЕНЬ " + lvl;
-        document.getElementById('xp-fill').style.width = xp + "%";
+    // Функция клика
+    window.handleTap = function() {
+        window.money++;
+        window.xp += 10;
         
-        let shopHtml = "";
-        for(let i=1; i<=5; i++) {
-            shopHtml += <div class="card"><b>Апгрейд ${i}</b><br><button onclick="buy(${i})">Купить</button></div>;
+        if(window.xp >= 100) {
+            window.xp = 0;
+            window.lvl++;
+            alert("НОВЫЙ УРОВЕНЬ!");
         }
-        document.getElementById('shop-items').innerHTML = shopHtml;
-    }
+        
+        // Обновляем текст
+        document.getElementById('money-txt').innerText = "$" + window.money;
+        document.getElementById('lvl-txt').innerText = "УРОВЕНЬ " + window.lvl;
+        document.getElementById('xp-fill').style.width = window.xp + "%";
+    };
 
-    function buy(i) {
-        if(money >= 10) { money -= 10; power += i; updateUI(); }
-    }
-
-    // Динозаврик упрощенный
-    let dInt, dSc = 0, dy = 0, dvy = 0;
-    function dJump() { if(dy === 0) dvy = 15; }
-    function startDino() {
-        dSc = 0; dy = 0; dvy = 0;
-        dInt = setInterval(() => {
-            dSc++; document.getElementById('d-sc').innerText = dSc;
-            dy += dvy; dvy -= 1;
-            if(dy < 0) { dy = 0; dvy = 0; }
-            document.getElementById('dino').style.bottom = dy + "px";
-        }, 30);
-    }
-    function stopDino() { clearInterval(dInt); }
-
-    // Запуск первой отрисовки
-    updateUI();
+    console.log("Скрипт загружен полностью");
 </script>
 </body>
 </html>
