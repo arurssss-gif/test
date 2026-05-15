@@ -3,65 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artur's Ventures | Idle Clicker</title>
+    <title>Artur's Dashboard | Clicker</title>
     <style>
-        :root {
-            --bg-dark: #0f172a;
-            --panel-bg: #1e293b;
-            --accent-gold: #fbbf24;
-            --text-main: #f8fafc;
-            --success-green: #22c55e;
-        }
-
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0;
             display: flex;
             height: 100vh;
-            overflow: hidden;
         }
 
-        /* Main Gameplay Area */
-        .game-viewport {
+        /* Main Game Area */
+        .viewport {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
         }
 
-        .stats-container {
+        .stats {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 30px;
         }
 
-        .balance-display {
-            font-size: 3.5rem;
+        .balance {
+            font-size: 60px;
             font-weight: 800;
-            color: var(--accent-gold);
-            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+            margin: 0;
         }
 
-        #mainClicker {
-            width: 280px;
-            height: 280px;
+        #tapButton {
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
-            background: radial-gradient(circle, #fcd34d 0%, #fbbf24 100%);
-            border: 12px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, #fbbf24, #d97706);
+            border: 8px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
-            outline: none;
-            transition: transform 0.05s ease-in-out, box-shadow 0.2s;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
+            font-size: 24px;
             font-weight: bold;
-            color: #92400e;
+            color: #451a03;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            transition: transform 0.05s;
         }
 
-        #mainClicker:active {
-            transform:
+        #tapButton:active {
+            transform: scale(0.92);
+        }
+
+        /* Store Sidebar */
+        .sidebar {
+            width: 340px;
+            background-color: #1e293b;
+            border-left: 1px solid #334155;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .store-title {
+            font-size: 20px;
+            border-bottom: 2px solid #fbbf24;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .upgrade-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .upgrade-btn:hover:not(:disabled) {
+            background-color: #475569;
+        }
+
+        .upgrade-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .upgrade-btn b {
+            display: block;
+            color: #fbbf24;
+            margin-top: 5px;
+        }
+
+        .social {
+            margin-top: 40px;
+            color: #38bdf8;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="viewport">
+        <div class="stats">
+            <h1 class="balance">$<span id="bal">0</span></h1>
+            <p>Per Click: +<span id="cpc">1</span> | Per Second: +<span id="cps">0</span></p>
+        </div>
+        
+        <button id="tapButton">TAP</button>
+
+        <a href="https://www.tiktok.com/@uunbra" class="social">Follow TikTok</a>
+    </div>
+
+    <div class="sidebar">
+        <div class="store-title">Upgrades Shop</div>
+        
+        <button class="upgrade-btn" onclick="buy('click', 1, 10)">
+            Micro-Processor (+1 Click)
+            <b id="cost-c1">Cost: 10</b>
+        </button>
+
+        <button class="upgrade-btn" onclick="buy('click', 10, 100)">
+            Logic Engine (+10 Click)
+            <b id="cost-c2">Cost: 100</b>
+        </button>
+
+        <button class="upgrade-btn" onclick="buy('auto', 1, 5)">
+            Basic Bot (+1/sec)
+            <b id="cost-a1">Cost: 5</b>
+        </button>
+
+        <button class="upgrade-btn" onclick="buy('auto', 50, 500)">
+            Server Farm (+50/sec)
+            <b id="cost-a2">Cost: 500</b>
+        </button>
+    </div>
+
+    <script>
+        // Game State
+        let balance = 0;
+        let clickPower = 1;
+        let autoPower = 0;
+
+        const balEl = document.getElementById('bal');
+        const cpcEl = document.getElementById('cpc');
+        const cpsEl = document.getElementById('cps');
+        const tapBtn = document.getElementById('tapButton');
+
+        // Click logic
+        tapBtn.onclick = () => {
+            balance += clickPower;
+            updateUI();
+        };
+
+        // Purchase logic
+        function buy(type, amount, price) {
+            if (balance >= price) {
+                balance -= price;
+                if (type === 'click') clickPower += amount;
+                if (type === 'auto') autoPower += amount;
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            balEl.innerText = Math.floor(balance);
+            cpcEl.innerText = clickPower;
+            cpsEl.innerText = autoPower;
+            
+            // Disable buttons if not enough money
+            // (You can add more logic here for auto-updating prices)
+        }
+
+        // Auto-clicker interval
+        setInterval(() => {
+            if (autoPower > 0) {
+                balance += autoPower;
+                updateUI();
+            }
+        }, 1000);
+
+        // Initial update
+        updateUI();
+    </script>
+</body>
+</html>
