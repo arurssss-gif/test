@@ -1,137 +1,48 @@
-<!DOCTYPE html>
-<html lang="ru">
+!DOCTYPE html>
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artur's Clicker & Shop</title>
+    <title>Clicker Artur</title>
     <style>
-        /* Стили, чтобы всё выглядело красиво */
-        body {
-            background-color: #1a1a1a;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
-            padding: 20px;
+        body { background: #121212; color: white; font-family: sans-serif; text-align: center; }
+        #coin { 
+            width: 200px; height: 200px; border-radius: 50%; 
+            background: gold; border: 8px solid orange; 
+            font-size: 30px; cursor: pointer; margin: 20px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
         }
-
-        .game-card {
-            background: #2d2d2d;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            margin: 20px auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-
-        #click-btn {
-            background: #ffcc00;
-            border: none;
-            border-radius: 50%;
-            width: 150px;
-            height: 150px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.1s;
-            margin: 20px 0;
-            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
-        }
-
-        #click-btn:active {
-            transform: scale(0.9);
-        }
-
-        .shop-box {
-            margin-top: 20px;
-            border-top: 1px solid #444;
-            padding-top: 15px;
-        }
-
-        button.upgrade {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        button:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
-
-        .links a {
-            display: block;
-            margin: 10px 0;
-            color: #00aaff;
-            text-decoration: none;
-        }
+        #coin:active { transform: scale(0.95); }
+        .info { font-size: 24px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>Hi, i am Artur</h1>
+    <h1>Artur's Clicker</h1>
+
+    <div class="info">Монеты: <span id="moneyText">0</span></div>
     
-    <div class="game-card">
-        <h2>Монеты: <span id="money">0</span> 🪙</h2>
-        <p>Сила клика: <span id="power">1</span></p>
-        
-        <button id="click-btn">ТАПАЙ!</button>
+    <button id="coin" onclick="addMoney()">ТАП!</button>
 
-        <div class="shop-box">
-            <p>Улучшение (+1 к клику)</p>
-            <button id="buy-upgrade" class="upgrade">Купить за 10 💰</button>
-        </div>
-    </div>
-
-    <div class="links">
-        <a href="https://google.com">PC-GAMER897</a>
-        <a href="https://www.tiktok.com/@uunbra" style="color: blue;">Open my TikTok</a>
+    <div style="margin-top: 50px;">
+        <a href="https://www.tiktok.com/@uunbra" style="color: cyan;">My TikTok</a>
     </div>
 
     <script>
-        // Логика игры
-        let score = 0;
-        let clickValue = 1;
-        let upgradePrice = 10;
+        // Создаем переменную для счета
+        let balance = 0;
 
-        const moneyDisplay = document.getElementById('money');
-        const powerDisplay = document.getElementById('power');
-        const clickBtn = document.getElementById('click-btn');
-        const upgradeBtn = document.getElementById('buy-upgrade');
-
-        // Клик по кнопке
-        clickBtn.addEventListener('click', () => {
-            score += clickValue;
-            updateUI();
-        });
-
-        // Покупка улучшения
-        upgradeBtn.addEventListener('click', () => {
-            if (score >= upgradePrice) {
-                score -= upgradePrice;
-                clickValue += 1;
-                upgradePrice = Math.round(upgradePrice * 1.6); // Цена растет
-                updateUI();
-            }
-        });
-
-        function updateUI() {
-            moneyDisplay.innerText = score;
-            powerDisplay.innerText = clickValue;
-            upgradeBtn.innerText = Купить за ${upgradePrice} 💰;
+        // Функция, которая прибавляет монету
+        function addMoney() {
+            // 1. Увеличиваем число на 1
+            balance = balance + 1;
             
-            // Проверка, хватает ли денег на апгрейд
-            if (score >= upgradePrice) {
-                upgradeBtn.disabled = false;
-            } else {
-                upgradeBtn.disabled = true;
-            }
+            // 2. Находим текст на странице и меняем его на новое число
+            document.getElementById('moneyText').innerText = balance;
+            
+            // Вывод в консоль для проверки (нажми F12 в браузере, чтобы увидеть)
+            console.log("Клик! Баланс теперь: " + balance);
         }
-
-        // Запускаем проверку кнопок при старте
-        updateUI();
     </script>
+
 </body>
 </html>
