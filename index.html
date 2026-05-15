@@ -3,246 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUN - GOD MODE CLICKER</title>
+    <title>RUN - GOD CLICKER</title>
     <style>
         :root { --accent: #00f2ff; --bg: #05070a; --panel: #0d1117; --rage: #ff0050; --gold: #ffd700; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; user-select: none; }
         
-        .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 120px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; }
-        .watermark { position: fixed; bottom: 20px; left: 100px; font-size: 20px; font-weight: bold; color: rgba(0,242,255,0.15); letter-spacing: 5px; }
-
-        /* Шкала Rage */
-        .rage-container { position: fixed; left: 30px; top: 50%; transform: translateY(-50%); width: 12px; height: 300px; background: #161b22; border: 1px solid #333; border-radius: 10px; overflow: hidden; }
-        #rage-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: var(--rage); box-shadow: 0 0 20px var(--rage); transition: 0.2s; }
-
-        /* Главная рабочая область */
-        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 20px; }
+        .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 100px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; }
         
-        /* Адаптивный магазин */
-        .shop { width: 30%; min-width: 360px; max-width: 450px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        .shop-items-container { flex: 1; overflow-y: auto; padding-right: 5px; }
+        /* Шкала Rage */
+        .rage-container { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); width: 10px; height: 250px; background: #161b22; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+        #rage-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: var(--rage); transition: height 0.2s; box-shadow: 0 0 15px var(--rage); }
 
-        /* Новая CSS монета вместо эмодзи */
-        #coin-wrap { position: relative; width: 350px; height: 350px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 20px 0; }
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        
+        /* Магазин */
+        .shop { width: 380px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        #shop-list { flex: 1; overflow-y: auto; padding-right: 5px; }
+
+        /* Монета */
+        #coin-wrap { width: 300px; height: 300px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; z-index: 10; }
         .digital-coin { 
-            width: 220px; height: 220px; background: radial-gradient(circle, #ffe566 0%, #cc9900 100%); 
-            border: 8px solid #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 90px; font-weight: 900; color: #664d00; user-select: none; transition: transform 0.05s, box-shadow 0.2s;
-            box-shadow: 0 0 40px rgba(0,242,255,0.25), inset 0 0 20px rgba(255,255,255,0.5);
+            width: 200px; height: 200px; background: radial-gradient(circle, #ffe566 0%, #cc9900 100%); 
+            border: 6px solid #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 80px; font-weight: 900; color: #664d00; transition: transform 0.05s;
+            box-shadow: 0 0 30px rgba(0,242,255,0.2);
         }
         #coin-wrap:active .digital-coin { transform: scale(0.9); }
         
-        /* Эффекты скинов монеты */
-        .coin-skin-2 { background: radial-gradient(circle, #ffffff 0%, #7a94a8 100%) !important; border-color: #b0c4de !important; color: #2f4f4f !important; }
-        .coin-skin-3 { background: radial-gradient(circle, #e6b8a2 0%, #9d0208 100%) !important; border-color: #dc2f02 !important; color: #370000 !important; }
+        .rage-active .digital-coin { animation: shake 0.1s infinite; border-color: var(--rage); box-shadow: 0 0 50px var(--rage); }
+        @keyframes shake { 0%{transform: translate(1px, 1px)} 50%{transform: translate(-1px, -1px)} 100%{transform: translate(1px, -1px)} }
 
-        /* Анимация Rage моды */
-        .rage-active .digital-coin { box-shadow: 0 0 60px var(--rage) !important; animation: shake 0.1s infinite; border-color: var(--rage) !important; }
-        @keyframes shake { 0%{transform:translate(2px)} 50%{transform:translate(-2px)} 100%{transform:translate(2px)} }
-
-        .stats-top { text-align: center; margin-bottom: 10px; }
-        h1#money { font-size: 65px; margin: 5px 0; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--accent); }
-        .prestige-info { color: var(--gold); font-weight: bold; font-size: 14px; margin-top: 5px; }
-
-        /* Красивые карточки товаров */
-        .item { background: #1c2128; border: 1px solid #30363d; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-sizing: border-box; transition: border-color 0.2s; }
-        .item:hover { border-color: var(--accent); }
-        .item b { color: var(--accent); font-size: 16px; display: block; margin-bottom: 4px; }
-        .item small { color: #8b949e; display: block; margin-bottom: 8px; }
-        .item button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #238636; color: white; transition: background 0.2s; }
+        h1#money { font-size: 60px; margin: 10px 0; text-shadow: 0 0 20px var(--accent); }
+        .item { background: #1c2128; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+        .item button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #238636; color: white; }
         .item button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-        .item button:not(:disabled):hover { background: #2ea043; }
 
-        /* Эффекты тапа */
-        .particle { position: absolute; width: 6px; height: 6px; background: var(--accent); pointer-events: none; border-radius: 2px; animation: p-out 0.8s ease-out forwards; }
-        @keyframes p-out { 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(360deg); } }
-
-        .pop { position: absolute; pointer-events: none; animation: popUp 0.7s forwards; font-weight: 900; font-size: 28px; z-index: 100; text-shadow: 2px 2px 0 #000; }
-        @keyframes popUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-150px); } }
-
-        #prestige-btn { display: none; margin-top: 15px; background: var(--gold); color: black; padding: 12px 25px; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; box-shadow: 0 0 20px var(--gold); transition: transform 0.2s; }
-        #prestige-btn:hover { transform: scale(1.05); }
-
-        #msg { position: absolute; top: 120px; background: white; color: black; padding: 10px 30px; border-radius: 50px; font-weight: bold; opacity: 0; transition: 0.4s; z-index: 1000; }
-        .reset-btn { margin-top: 15px; opacity: 0.2; background: none; color: white; border: none; cursor: pointer; padding: 5px; font-size: 11px; }
-        .reset-btn:hover { opacity: 0.8; color: var(--rage); }
+        .pop { position: absolute; pointer-events: none; animation: popUp 0.6s forwards; font-weight: 900; font-size: 24px; z-index: 100; }
+        @keyframes popUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-100px); } }
     </style>
 </head>
-<body id="body">
+<body>
 
-<div id="msg">LEVEL UP!</div>
 <div class="side-run">RUN</div>
-<div class="watermark">arurs</div>
-
 <div class="rage-container"><div id="rage-fill"></div></div>
 
 <div class="main">
-    <div class="stats-top">
-        <div id="lvl" style="color:var(--accent); font-weight: bold; letter-spacing: 3px;">LVL 1</div>
-        <h1 id="money">$0</h1>
-        <div id="prestige-info" class="prestige-info"></div>
-    </div>
-
-    <div id="coin-wrap" onmousedown="handleTap(event)">
+    <div id="lvl" style="color:var(--accent); font-weight: bold;">LVL 1</div>
+    <h1 id="money">$0</h1>
+    <div id="coin-wrap">
         <div id="coin" class="digital-coin">$</div>
     </div>
-    
-    <button id="prestige-btn" onclick="doPrestige()">ПЕРЕРОЖДЕНИЕ (X2 СИЛА)</button>
-    <p style="opacity: 0.4; margin-top: 15px;">Сила клика: <span id="pwr-val">1</span> | Всего кликов: <span id="best-val">0</span></p>
+    <p style="opacity: 0.5;">Мощность: <span id="pwr-val">1</span></p>
 </div>
 
 <div class="shop">
-    <h3 style="text-align: center; color: var(--accent); margin-top: 0; letter-spacing: 3px;">MARKET</h3>
-    <div class="shop-items-container" id="shop-list"></div>
-    <button class="reset-btn" onclick="hardReset()">Сбросить прогресс</button>
+    <h3 style="text-align: center; color: var(--accent);">МАГАЗИН</h3>
+    <div id="shop-list"></div>
+    <button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; opacity:0.3; background:none; color:white; border:none; cursor:pointer;">Сброс</button>
 </div>
 
 <script>
-    let money = 0, pwr = 1, xp = 0, lvl = 1, nextXp = 100;
-    let rage = 0, isRage = false, prestigeMult = 1, totalClicks = 0;
-    let upgrades = [];
+    // Все переменные в одном месте
+    let state = {
+        money: 0, pwr: 1, xp: 0, lvl: 1, nextXp: 100,
+        rage: 0, isRage: false, upgrades: []
+    };
 
-    function initUpgrades() {
-        upgrades = [];
+    // Принудительная инициализация
+    function init() {
+        state.upgrades = [];
         for(let i=1; i<=30; i++) {
-            upgrades.push({
+            state.upgrades.push({
                 name: "Улучшение #" + i,
                 cost: Math.floor(20 * Math.pow(1.7, i)),
                 bonus: Math.floor(4 * Math.pow(1.6, i))
             });
         }
-    }
 
-    function save() {
-        const data = { money, pwr, xp, lvl, nextXp, upgrades, prestigeMult, totalClicks };
-        localStorage.setItem('arturMegaSave', JSON.stringify(data));
-    }
-
-    function load() {
-        initUpgrades();
-        const saved = localStorage.getItem('arturMegaSave');
+        const saved = localStorage.getItem('runClickerSave');
         if(saved) {
             const d = JSON.parse(saved);
-            money = d.money; pwr = d.pwr; xp = d.xp; lvl = d.lvl;
-            nextXp = d.nextXp; upgrades = d.upgrades; 
-            prestigeMult = d.prestigeMult || 1;
-            totalClicks = d.totalClicks || 0;
+            Object.assign(state, d);
         }
+        
+        // Вешаем клик программно, чтобы точно работало
+        document.getElementById('coin-wrap').addEventListener('mousedown', handleTap);
         updateUI();
     }
 
-    window.handleTap = function(e) {
-        if(!isRage) { rage += 2; if(rage >= 100) startRage(); }
-        updateRageBar();
+    function handleTap(e) {
+        if(!state.isRage) {
+            state.rage += 2;
+            if(state.rage >= 100) startRage();
+        }
 
         let crit = Math.random() < 0.15;
-        let val = pwr * prestigeMult * (isRage ? 2 : 1) * (crit ? 6 : 1);
+        let val = state.pwr * (state.isRage ? 2 : 1) * (crit ? 6 : 1);
         
-        money += val; xp += 10; totalClicks++;
+        state.money += val;
+        state.xp += 10;
         
-        spawnText(e.clientX, e.clientY, (crit ? "💥 " : "+") + Math.floor(val), crit);
-        createParticles(e.clientX, e.clientY);
-        
-        if(xp >= nextXp) {
-            lvl++; xp = 0; nextXp *= 1.6;
-            updateSkin();
-            notify("LEVEL UP: " + lvl);
+        if(state.xp >= state.nextXp) {
+            state.lvl++; state.xp = 0; state.nextXp *= 1.6;
         }
-        
-        if(lvl >= 20) document.getElementById('prestige-btn').style.display = 'block';
 
+        spawnText(e.clientX, e.clientY, (crit ? "💥 " : "+") + Math.floor(val), crit);
         updateUI();
         save();
-    };
-
-    function startRage() {
-        isRage = true;
-        document.getElementById('body').classList.add('rage-active');
-        let t = setInterval(() => {
-            rage -= 1.5; updateRageBar();
-            if(rage <= 0) { isRage = false; clearInterval(t); document.getElementById('body').classList.remove('rage-active'); }
-        }, 100);
     }
 
-    function updateRageBar() { document.getElementById('rage-fill').style.height = rage + "%"; }
+    function startRage() {
+        state.isRage = true;
+        document.getElementById('body')?.classList.add('rage-active'); // На всякий случай
+        document.body.classList.add('rage-active');
+        let t = setInterval(() => {
+            state.rage -= 1.5;
+            document.getElementById('rage-fill').style.height = state.rage + "%";
+            if(state.rage <= 0) {
+                state.isRage = false;
+                clearInterval(t);
+                document.body.classList.remove('rage-active');
+            }
+        }, 100);
+    }
 
     function spawnText(x, y, txt, crit) {
         const el = document.createElement('div');
         el.className = 'pop';
         el.style.left = x + 'px'; el.style.top = y + 'px';
-        el.style.color = crit ? "var(--gold)" : (isRage ? "var(--rage)" : "white");
+        el.style.color = crit ? "var(--gold)" : "white";
         el.innerText = txt;
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 700);
-    }
-
-    function createParticles(x, y) {
-        for(let i=0; i<6; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = x + 'px'; p.style.top = y + 'px';
-            p.style.setProperty('--dx', (Math.random()*200-100)+'px');
-            p.style.setProperty('--dy', (Math.random()*200-100)+'px');
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 800);
-        }
+        setTimeout(() => el.remove(), 600);
     }
 
     window.buy = function(i) {
-        if(money >= upgrades[i].cost) {
-            money -= upgrades[i].cost;
-            pwr += upgrades[i].bonus;
-            upgrades[i].cost = Math.floor(upgrades[i].cost * 1.5);
+        let u = state.upgrades[i];
+        if(state.money >= u.cost) {
+            state.money -= u.cost;
+            state.pwr += u.bonus;
+            u.cost = Math.floor(u.cost * 1.5);
             updateUI();
             save();
         }
     };
 
-    window.doPrestige = function() {
-        if(confirm("Перерождение сбросит текущие деньги, но даст вечный X2 множитель! Начать?")) {
-            prestigeMult *= 2;
-            money = 0; pwr = 1; lvl = 1; xp = 0; nextXp = 100;
-            initUpgrades();
-            document.getElementById('prestige-btn').style.display = 'none';
-            save();
-            location.reload();
-        }
-    };
-
-    function updateSkin() {
-        const c = document.getElementById('coin');
-        c.className = "digital-coin";
-        if (lvl > 15) { c.classList.add('coin-skin-3'); c.innerText = "✦"; }
-        else if (lvl > 8) { c.classList.add('coin-skin-2'); c.innerText = "♦️"; }
-        else { c.innerText = "$"; }
-    }
-
     function updateUI() {
-        document.getElementById('money').innerText = "$" + Math.floor(money).toLocaleString();
-        document.getElementById('pwr-val').innerText = (pwr * prestigeMult).toLocaleString();
-        document.getElementById('lvl').innerText = "LVL " + lvl;
-        document.getElementById('best-val').innerText = totalClicks;
-        document.getElementById('prestige-info').innerText = prestigeMult > 1 ? МНОЖИТЕЛЬ ПРЕСТИЖА: X${prestigeMult} : "";
-        updateSkin();
+        document.getElementById('money').innerText = "$" + Math.floor(state.money).toLocaleString();
+        document.getElementById('pwr-val').innerText = state.pwr.toLocaleString();
+        document.getElementById('lvl').innerText = "LVL " + state.lvl;
+        document.getElementById('rage-fill').style.height = state.rage + "%";
 
         let h = "";
-        upgrades.forEach((u, i) => {
-            const canBuy = money >= u.cost;
-            h += `<div class="item"><b>${u.name}</b><small>+${u.bonus.toLocaleString()} клик</small>
+        state.upgrades.forEach((u, i) => {
+            const canBuy = state.money >= u.cost;
+            h += `<div class="item"><b>${u.name}</b><br>
                   <button onclick="buy(${i})" ${canBuy ? '' : 'disabled'}>$${u.cost.toLocaleString()}</button></div>`;
         });
         document.getElementById('shop-list').innerHTML = h;
     }
 
-    function notify(t) {
-        const m = document.getElementById('msg');
-        m.innerText = t; m.style.opacity = 1;
-        setTimeout(() => m.style.opacity = 0, 1500);
-    }
+    function save() { localStorage.setItem('runClickerSave', JSON.stringify(state)); }
 
-    window.hardReset = function() { if(confirm("Полностью очистить сохранения?")) { localStorage.clear(); location.reload(); } };
-
-    load();
+    // Старт
+    init();
 </script>
 </body>
 </html>
