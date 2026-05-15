@@ -3,26 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUN - GOD CLICKER</title>
+    <title>RUN - INSANE CLICKER</title>
     <style>
         :root { --accent: #00f2ff; --bg: #05070a; --panel: #0d1117; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; user-select: none; }
+        
+        /* Брендинг */
         .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 100px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; }
         .watermark { position: fixed; bottom: 20px; left: 20px; font-size: 20px; font-weight: bold; color: rgba(0,242,255,0.15); letter-spacing: 5px; }
-        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #111821 0%, #05070a 100%); }
+
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
         .shop { width: 400px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
-        #coin { font-size: 160px; cursor: pointer; user-select: none; transition: transform 0.05s; filter: drop-shadow(0 0 30px rgba(0,242,255,0.1)); margin: 20px; }
-        #coin:active { transform: scale(0.92); }
+
+        /* Кликер */
+        #coin-container { position: relative; }
+        #coin { font-size: 160px; cursor: pointer; transition: transform 0.05s; filter: drop-shadow(0 0 30px rgba(0,242,255,0.1)); }
+        #coin:active { transform: scale(0.9); }
+
+        /* Комбо */
+        #combo-ui { position: absolute; top: -40px; right: -40px; font-size: 24px; font-weight: 900; color: #ff0050; opacity: 0; transform: rotate(15deg); }
+
+        /* Вылетающие цифры */
+        .tap-val { position: absolute; color: white; font-weight: bold; pointer-events: none; animation: floatUp 0.6s ease-out forwards; z-index: 100; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+
+        /* Золотая искра */
+        .bonus-star { position: absolute; font-size: 40px; cursor: pointer; animation: fly 3s linear forwards; z-index: 200; filter: drop-shadow(0 0 15px gold); }
+        @keyframes fly { 0% { left: -50px; top: 20%; } 100% { left: 110%; top: 80%; } }
+
         .xp-box { width: 350px; height: 12px; background: #161b22; border-radius: 10px; margin: 20px 0; overflow: hidden; border: 1px solid #30363d; }
         #xp-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #7000ff); transition: 0.3s; }
-        h1#money { font-size: 65px; margin: 10px 0; color: #fff; text-shadow: 0 0 15px var(--accent); }
-        .item { background: #1c2128; border: 1px solid #30363d; padding: 15px; border-radius: 12px; margin-bottom: 12px; transition: 0.2s; }
-        .item:hover { border-color: var(--accent); }
-        .item b { display: block; font-size: 16px; margin-bottom: 5px; color: var(--accent); }
-        .item span { display: block; font-size: 13px; opacity: 0.6; margin-bottom: 10px; }
-        .item button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #238636; color: white; }
-        .item button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-        #msg { position: absolute; top: 50px; background: var(--accent); color: #000; padding: 12px 30px; border-radius: 50px; font-weight: bold; opacity: 0; transition: 0.4s; z-index: 100; }
+        
+        h1#money { font-size: 65px; margin: 10px 0; text-shadow: 0 0 15px var(--accent); }
+        .item { background: #1c2128; border: 1px solid #30363d; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
+        .item button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #238636; color: white; margin-top: 5px; }
+        .item button:disabled { background: #21262d; color: #484f58; }
+        #msg { position: absolute; top: 30px; background: var(--accent); color: #000; padding: 10px 30px; border-radius: 50px; font-weight: bold; opacity: 0; transition: 0.4s; z-index: 300; }
     </style>
 </head>
 <body>
@@ -31,12 +47,17 @@
 <div class="side-run">RUN</div>
 <div class="watermark">arurs</div>
 
-<div class="main">
+<div class="main" id="game-zone">
     <h2 id="lvl" style="color:var(--accent)">LEVEL 1</h2>
     <div class="xp-box"><div id="xp-bar"></div></div>
-    <div id="coin" onclick="tap()">🪙</div>
+    
+    <div id="coin-container">
+        <div id="combo-ui">X1.0</div>
+        <div id="coin" onclick="handleTap(event)">🪙</div>
+    </div>
+
     <h1 id="money">$0</h1>
-    <p>Сила клика: <span id="pwr-txt" style="color:var(--accent)">1</span></p>
+    <p>Множитель клика: <span id="mult-ui">1.0</span>x</p>
 </div>
 
 <div class="shop">
@@ -46,38 +67,63 @@
 
 <script>
     let money = 0, pwr = 1, xp = 0, lvl = 1, nextXp = 100;
+    let combo = 1, comboTimer;
 
-    const names = [
-        "Медный палец", "Железный клик", "Алмазный тап", "Золотая рука", "Энерго-диск", 
-        "Кибер-усилитель", "Плазменный заряд", "Квантовый толчок", "Гравитационный молот", "Звездная пыль",
-        "Ядро реактора", "Темная материя", "Импульс пустоты", "Вечный двигатель", "Сингулярность",
-        "Код бога", "Взрыв сверхновой", "Галактический луч", "Анти-материя", "Разрыв реальности",
-        "Цифровой рай", "Абсолютная мощь", "Титан", "Оракул", "Мастер кликов",
-        "Легенда", "Бесконечность", "Творец", "Финал", "RUN - GOD"
-    ];
-
-    const upgrades = names.map((name, i) => ({
-        name: name,
-        cost: Math.floor(20 * Math.pow(1.8, i)), // Экспоненциальная цена
-        bonus: Math.floor(2 * Math.pow(1.7, i))  // Экспоненциальный бонус (теперь ощутимо!)
+    const names = ["Микро-чип", "Процессор", "Сервер", "Крипто-ферма", "Дата-центр", "ИИ-модуль", "Спутник", "Матрица", "Галактика", "Вселенная"];
+    const upgrades = names.map((n, i) => ({
+        name: n, cost: Math.floor(25 * Math.pow(2, i)), bonus: Math.floor(5 * Math.pow(1.8, i))
     }));
 
-    window.tap = function() {
-        money += pwr; xp += 10;
+    window.handleTap = function(e) {
+        // Логика комбо
+        clearTimeout(comboTimer);
+        combo = Math.min(combo + 0.05, 3.0);
+        document.getElementById('combo-ui').style.opacity = 1;
+        document.getElementById('combo-ui').innerText = "X" + combo.toFixed(1);
+        comboTimer = setTimeout(() => { combo = 1; document.getElementById('combo-ui').style.opacity = 0; }, 1500);
+
+        // Крит (10% шанс)
+        let isCrit = Math.random() < 0.1;
+        let finalPwr = pwr * combo * (isCrit ? 5 : 1);
+        
+        money += finalPwr;
+        xp += 10;
+
+        // Эффекты
+        createTapText(e.clientX, e.clientY, (isCrit ? "🔥 CRIT! " : "+") + Math.floor(finalPwr));
+        if(isCrit) { document.getElementById('coin').style.filter = "drop-shadow(0 0 40px gold) brightness(1.5)"; setTimeout(()=>document.getElementById('coin').style.filter="none", 100); }
+
         if (xp >= nextXp) {
-            xp = 0; lvl++; nextXp = Math.floor(nextXp * 1.5);
-            updateVisuals();
+            xp = 0; lvl++; nextXp *= 1.5;
             showMsg("LEVEL UP: " + lvl);
+            updateSkin();
         }
         updateUI();
     };
 
-    function updateVisuals() {
+    function createTapText(x, y, txt) {
+        const el = document.createElement('div');
+        el.className = 'tap-val';
+        el.style.left = x + 'px'; el.style.top = y + 'px';
+        el.innerText = txt;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 600);
+    }
+
+    // Случайная бонусная звезда
+    setInterval(() => {
+        if(Math.random() < 0.3) {
+            const s = document.createElement('div');
+            s.className = 'bonus-star'; s.innerText = '✨';
+            s.onclick = () => { money += pwr * 30; showMsg("BONUS +30!"); s.remove(); updateUI(); };
+            document.getElementById('game-zone').appendChild(s);
+            setTimeout(() => s.remove(), 3000);
+        }
+    }, 10000);
+
+    function updateSkin() {
         const c = document.getElementById('coin');
-        if (lvl >= 25) c.innerText = "🌌";
-        else if (lvl >= 20) c.innerText = "🌀";
-        else if (lvl >= 15) c.innerText = "💎";
-        else if (lvl >= 10) c.innerText = "👑";
+        if (lvl >= 10) c.innerText = "💎";
         else if (lvl >= 5) c.innerText = "💰";
     }
 
@@ -85,7 +131,7 @@
         if (money >= upgrades[i].cost) {
             money -= upgrades[i].cost;
             pwr += upgrades[i].bonus;
-            upgrades[i].cost = Math.floor(upgrades[i].cost * 1.5);
+            upgrades[i].cost = Math.floor(upgrades[i].cost * 1.6);
             updateUI();
         }
     };
@@ -93,29 +139,22 @@
     function updateUI() {
         document.getElementById('money').innerText = "$" + Math.floor(money).toLocaleString();
         document.getElementById('lvl').innerText = "LEVEL " + lvl;
-        document.getElementById('pwr-txt').innerText = pwr.toLocaleString();
+        document.getElementById('mult-ui').innerText = combo.toFixed(1);
         document.getElementById('xp-bar').style.width = (xp / nextXp * 100) + "%";
 
         let h = "";
         upgrades.forEach((u, i) => {
             const canBuy = money >= u.cost;
-            h += `
-                <div class="item">
-                    <b>${u.name}</b>
-                    <span>Дает: +${u.bonus.toLocaleString()} к клику</span>
-                    <button onclick="buy(${i})" ${canBuy ? '' : 'disabled'}>
-                        $${u.cost.toLocaleString()}
-                    </button>
-                </div>
-            `;
+            h += `<div class="item"><b>${u.name}</b><span>+${u.bonus.toLocaleString()} к базе</span>
+                  <button onclick="buy(${i})" ${canBuy ? '' : 'disabled'}>$${u.cost.toLocaleString()}</button></div>`;
         });
         document.getElementById('shop-list').innerHTML = h;
     }
 
     function showMsg(t) {
         const e = document.getElementById('msg');
-        e.innerText = t; e.style.opacity = "1";
-        setTimeout(() => e.style.opacity = "0", 1500);
+        e.innerText = t; e.style.opacity = 1;
+        setTimeout(() => e.style.opacity = 0, 1500);
     }
 
     updateUI();
