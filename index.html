@@ -2,173 +2,164 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Artur's Game Hub v3.0</title>
+    <title>Artur's Final Game Hub</title>
     <style>
-        :root { --bg: #0b0f1a; --panel: #161b2c; --accent: #fbbf24; --green: #10b981; --text: #f8fafc; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Navigation */
-        nav { background: var(--panel); display: flex; justify-content: center; gap: 15px; padding: 15px; border-bottom: 2px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 100; }
-        nav button { background: rgba(255,255,255,0.05); border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        /* Nav */
+        nav { background: var(--panel); padding: 15px; display: flex; justify-content: center; gap: 15px; border-bottom: 2px solid var(--accent); }
+        nav button { background: #334155; border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         nav button.active { background: var(--accent); color: #000; }
 
-        .tab { display: none; flex: 1; width: 100%; height: 100%; overflow: hidden; }
+        .tab { display: none; flex: 1; width: 100%; height: 100%; }
         .tab.active { display: flex; }
 
-        /* Clicker Elements */
-        .sidebar { width: 280px; background: rgba(0,0,0,0.2); padding: 15px; overflow-y: auto; border-right: 1px solid #2d3748; }
-        .main-view { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #1e293b 0%, #0b0f1a 100%); }
-        .shop-view { width: 350px; background: var(--panel); padding: 15px; overflow-y: auto; border-left: 1px solid #2d3748; }
-        
-        #asset { font-size: 110px; cursor: pointer; user-select: none; transition: 0.1s; filter: drop-shadow(0 0 25px rgba(251,191,36,0.3)); }
+        /* Clicker Layout */
+        .sidebar { width: 250px; background: rgba(0,0,0,0.3); padding: 20px; overflow-y: auto; border-right: 1px solid #334155; }
+        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .shop { width: 320px; background: var(--panel); padding: 20px; overflow-y: auto; border-left: 1px solid #334155; }
+
+        #asset { font-size: 120px; cursor: pointer; user-select: none; transition: 0.1s; }
         #asset:active { transform: scale(0.85); }
         
-        .xp-container { width: 300px; height: 12px; background: #2d3748; border-radius: 6px; margin: 15px 0; overflow: hidden; }
-        #xpFill { width: 0%; height: 100%; background: var(--accent); box-shadow: 0 0 10px var(--accent); transition: 0.3s; }
+        .xp-bar { width: 250px; height: 10px; background: #334155; border-radius: 5px; margin: 15px; overflow: hidden; }
+        #xpFill { width: 0%; height: 100%; background: var(--accent); transition: 0.3s; }
 
-        .upg-card { background: #1e293b; padding: 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #334155; }
-        .upg-card b { color: var(--accent); display: block; margin-bottom: 5px; }
-        .upg-card button { width: 100%; background: var(--green); border: none; color: white; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .upg-card button:disabled { background: #334155; opacity: 0.5; cursor: not-allowed; }
+        .item { background: #2d3748; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #475569; }
+        .item button { width: 100%; padding: 8px; background: #22c55e; border: none; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        .item button:disabled { background: #4a5568; opacity: 0.5; }
 
-        .lb-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2d3748; font-size: 14px; }
-        .me { color: var(--accent); font-weight: bold; }
-
-        /* Game Screens */
-        .canvas-area { width: 600px; height: 250px; background: #1e293b; border: 3px solid #334155; position: relative; overflow: hidden; border-radius: 10px; }
-        #dino { position: absolute; bottom: 0; left: 50px; font-size: 45px; transform: scaleX(-1); }
-        #mosquito { position: absolute; font-size: 35px; width: 40px; height: 40px; }
+        /* Game Areas */
+        .canvas { width: 600px; height: 250px; background: #1e293b; border: 2px solid #334155; position: relative; overflow: hidden; margin: auto; }
+        #dino { position: absolute; bottom: 0; left: 50px; font-size: 40px; transform: scaleX(-1); }
+        #mosq { position: absolute; font-size: 40px; width: 40px; height: 40px; bottom: 50px; left: 150px; }
+        .cactus { position: absolute; bottom: 0; right: -50px; font-size: 35px; }
+        .cloud { position: absolute; width: 70px; height: 15px; background: white; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <nav>
-    <button onclick="st('c')" id="bc" class="active">CLICKER</button>
-    <button onclick="st('d')" id="bd">DINO</button>
-    <button onclick="st('m')" id="bm">MOSQUITO</button>
+    <button onclick="show('c')" id="nc" class="active">CLICKER</button>
+    <button onclick="show('d')" id="nd">DINO</button>
+    <button onclick="show('m')" id="nm">MOSQUITO</button>
 </nav>
 
 <div id="tc" class="tab active">
     <div class="sidebar">
-        <h3 style="color:var(--accent)">Leaderboard</h3>
-        <div id="leaderboard"></div>
+        <h3 style="color:var(--accent)">Top Players</h3>
+        <div id="lb"></div>
     </div>
-    <div class="main-view">
-        <h2 id="lvInfo" style="margin-bottom:0">Level 1</h2>
-        <div class="xp-container"><div id="xpFill"></div></div>
-        <div id="asset" onclick="tap()">🪙</div>
-        <h1 id="balance" style="font-size: 3.5rem; margin:15px 0;">$0</h1>
-        <p style="color:#94a3b8">CPC: <span id="cpc">1</span> | CPS: <span id="cps">0</span></p>
+    <div class="main-content">
+        <h2 id="lvl">Level 1</h2>
+        <div class="xp-bar"><div id="xpFill"></div></div>
+        <div id="asset" onclick="doTap()">🪙</div>
+        <h1 id="bal">$0</h1>
+        <p>Click: +<span id="cpc">1</span> | Idle: +<span id="cps">0</span></p>
     </div>
-    <div class="shop-view">
-        <h3 style="color:var(--accent)">Upgrades (30)</h3>
-        <div id="shopList"></div>
+    <div class="shop">
+        <h3 style="color:var(--accent)">Upgrades</h3>
+        <div id="sl"></div>
     </div>
 </div>
 
 <div id="td" class="tab">
-    <div class="main-view">
-        <h1>Dino Run | Score: <span id="dScore">0</span></h1>
-        <div class="canvas-area" id="dArea" onclick="dJump()">
+    <div class="main-content">
+        <h1>Score: <span id="ds">0</span></h1>
+        <div class="canvas" onclick="dJump()">
             <div id="dino">🦖</div>
+            <div id="cactusZone"></div>
         </div>
-        <p>Press Space or Click to Jump</p>
     </div>
 </div>
 
 <div id="tm" class="tab">
-    <div class="main-view">
-        <h1>Height: <span id="mScore">0</span></h1>
-        <div class="canvas-area" id="mArea" style="width:350px; height:500px">
-            <div id="mosquito">🦟</div>
+    <div class="main-content">
+        <h1>Height: <span id="ms">0</span></h1>
+        <div class="canvas" style="width:350px; height:500px" id="mZone">
+            <div id="mosq">🦟</div>
         </div>
-        <p>Hold Space/Mouse to Fly! Use Arrows.</p>
     </div>
 </div>
 
 <script>
-    // --- DATABASE ---
-    let s = { b: 0, cp: 1, cs: 0, xp: 0, lv: 1 };
-    let items = [];
+    // --- DATA ---
+    let bank = 0, clickP = 1, idleP = 0, xp = 0, lv = 1;
+    let upgs = [];
     for(let i=1; i<=30; i++) {
-        items.push({ id: i, n: "Upgrade Lv."+i, c: Math.floor(20 * Math.pow(1.7, i/1.3)), p: i*3, t: i%2===0?'c':'s' });
+        upgs.push({ n: "Upgrade "+i, c: Math.floor(10 * Math.pow(1.6, i)), p: i*2, t: i%2===0?'c':'i' });
     }
 
-    // --- SYSTEM ---
-    function st(t) {
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
-        document.getElementById('t'+t).classList.add('active');
-        document.getElementById('b'+t).classList.add('active');
-        if(t==='d') initDino(); else stopDino();
-        if(t==='m') initMos(); else stopMos();
+    // --- TABS ---
+    function show(id) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('t'+id).classList.add('active');
+        document.getElementById('n'+id).classList.add('active');
+        if(id === 'd') startDino(); else stopDino();
+        if(id === 'm') startMos(); else stopMos();
     }
 
-    // --- CLICKER LOGIC ---
-    function tap() {
-        s.b += s.cp; s.xp += 15;
-        if(s.xp >= 100) { s.xp = 0; s.lv++; }
-        updateUI();
+    // --- CLICKER ---
+    function doTap() {
+        bank += clickP;
+        xp += 10;
+        if(xp >= 100) { xp = 0; lv++; }
+        refresh();
     }
 
     function buy(i) {
-        let u = items[i];
-        if(s.b >= u.c) {
-            s.b -= u.c;
-            if(u.t === 'c') s.cp += u.p; else s.cs += u.p;
-            u.c = Math.floor(u.c * 2.2); // Price growth
-            updateUI();
+        if(bank >= upgs[i].c) {
+            bank -= upgs[i].c;
+            if(upgs[i].t === 'c') clickP += upgs[i].p; else idleP += upgs[i].p;
+            upgs[i].c = Math.floor(upgs[i].c * 2);
+            refresh();
         }
     }
 
-    function updateUI() {
-        document.getElementById('balance').innerText = "$" + Math.floor(s.b);
-        document.getElementById('cpc').innerText = s.cp;
-        document.getElementById('cps').innerText = s.cs;
-        document.getElementById('xpFill').style.width = s.xp + "%";
-        document.getElementById('lvInfo').innerText = "Level " + s.lv;
+    function refresh() {
+        document.getElementById('bal').innerText = "$" + Math.floor(bank);
+        document.getElementById('cpc').innerText = clickP;
+        document.getElementById('cps').innerText = idleP;
+        document.getElementById('xpFill').style.width = xp + "%";
+        document.getElementById('lvl').innerText = "Level " + lv;
         
         let icons = ["🪙","💵","💰","💎","👑","🏦","🏛️"];
-        document.getElementById('asset').innerText = icons[Math.min(s.lv-1, 6)];
+        document.getElementById('asset').innerText = icons[Math.min(lv-1, 6)];
 
-        // Render Shop
-        let h = "";
-        items.forEach((u, i) => {
-            h += `<div class="upg-card">
-                <b>${u.n}</b> (+${u.p} ${u.t==='c'?'Click':'Sec'})
-                <button onclick="buy(${i})" ${s.b < u.c ? 'disabled':''}>Buy: $${u.c}</button>
+        // Shop
+        let sHtml = "";
+        upgs.forEach((u, i) => {
+            sHtml += `<div class="item">
+                <b>${u.n}</b> (+${u.p} ${u.t==='c'?'Tap':'Sec'})
+                <button onclick="buy(${i})" ${bank < u.c ? 'disabled':''}>Buy: $${u.c}</button>
             </div>`;
         });
-        document.getElementById('shopList').innerHTML = h;
+        document.getElementById('sl').innerHTML = sHtml;
 
-        // Render Leaderboard
-        let lb = <div class="lb-row me"><span>1. Artur (You)</span><span>$${Math.floor(s.b)}</span></div>;
-        for(let i=2; i<=15; i++) lb += <div class="lb-row"><span>${i}. Player_${i+10}</span><span>$${Math.floor(s.b/(i*1.5))}</span></div>;
-        document.getElementById('leaderboard').innerHTML = lb;
+        // Leaderboard
+        let lHtml = <div style="color:var(--accent)">1. You: $${Math.floor(bank)}</div>;
+        for(let i=2; i<=10; i++) lHtml += <div>${i}. Bot_${i}: $${Math.floor(bank/(i*0.8))}</div>;
+        document.getElementById('lb').innerHTML = lHtml;
     }
 
-    setInterval(() => { if(s.cs > 0) { s.b += s.cs; updateUI(); } }, 1000);
+    setInterval(() => { if(idleP > 0) { bank += idleP; refresh(); } }, 1000);
 
-    // --- DINO LOGIC ---
-    let dLoop, dSc = 0, dSpd = 5, dIsJ = false;
-    function dJump() { 
-        if(!dIsJ) { 
-            dIsJ = true; 
-            let d = document.getElementById('dino');
-            d.style.transition = "0.4s cubic-bezier(0.4, 0, 0.2, 1)";
-            d.style.bottom = "140px";
-            setTimeout(() => { d.style.bottom = "0"; setTimeout(() => dIsJ = false, 400); }, 400);
-        }
-    }
-    function initDino() {
-        dSc = 0; dSpd = 5.5; 
-        document.querySelectorAll('.cactus').forEach(c => c.remove());
-        dLoop = setInterval(() => {
-            dSc++; dSpd += 0.002;
-            document.getElementById('dScore').innerText = Math.floor(dSc/10);
+    // --- DINO ---
+    let dI, dScore = 0, dSpd = 6, isJ = false;
+    function dJump() { if(!isJ) { isJ=true; let d=document.getElementById('dino'); d.style.bottom="130px"; setTimeout(()=>{d.style.bottom="0px"; isJ=false;}, 500); } }
+    function startDino() {
+        dScore = 0; dSpd = 6;
+        document.getElementById('cactusZone').innerHTML = "";
+        dI = setInterval(() => {
+            dScore++; dSpd += 0.001;
+            document.getElementById('ds').innerText = Math.floor(dScore/10);
             if(Math.random() < 0.02) {
-                let c = document.createElement('div');
-                c.className = 'cactus';
-                c.style.cssText = position:absolute; bottom:0; right:-50px; font-size:35px;;
+                let c = document.createElement('div'); c.className = 'cactus';
                 c.innerText = Math.random() > 0.5 ? '🌵' : '🌵🌵';
-                document.getElementById('dArea').appendChild(
+                c.style.right = "-50px"; document.getElementById('cactusZone').appendChild(c);
+            }
+            document.querySelectorAll('.cactus').forEach(c => {
+                let r = parseInt(c.style.right) || -50;
+                c.
