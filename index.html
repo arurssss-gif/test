@@ -66,8 +66,8 @@
         .reborn-card button:disabled { background: #21262d; color: #484f58; box-shadow: none; cursor: not-allowed; }
 
         /* Тексты кликов */
-        .pop { position: absolute; pointer-events: none; animation: floatUp 0.6s ease-out forwards; font-weight: 900; font-size: 26px; z-index: 200; text-shadow: 2px 2px 0 #000; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.2); } }
+        .pop { position: absolute; pointer-events: none; animation: floatUp 0.6s ease-out forwards; font-weight: 900; font-size: 26px; z-index: 200; text-shadow: 2px 2px 0 #000; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) translateY(0); } 100% { opacity: 0; transform: translate(-50%, -50%) translateY(-100px); } }
 
         /* Всплывающее уведомление на экране */
         #notify-msg { position: absolute; top: 120px; background: rgba(0, 242, 255, 0.9); color: black; padding: 10px 25px; border-radius: 50px; font-weight: bold; opacity: 0; transition: opacity 0.3s ease; z-index: 1000; pointer-events: none; }
@@ -82,7 +82,7 @@
         }
     </style>
 </head>
-<body id="body">
+<body>
 
 <div id="notify-msg">НОВЫЙ УРОВЕНЬ!</div>
 <div class="rage-container"><div id="rage-fill"></div></div>
@@ -95,7 +95,7 @@
     
     <div class="xp-wrapper"><div id="xp-bar"></div></div>
 
-    <div id="coin-wrap" onclick="handleInteraction(event)">
+    <div id="coin-wrap" onclick="handleInteraction()">
         <div id="coin" class="digital-coin">$</div>
     </div>
     
@@ -139,21 +139,21 @@
 
     function startLoading() {
         initShop();
-        const saved = localStorage.getItem('runUltimateSaveV3');
+        const saved = localStorage.getItem('runUltimateSaveV4');
         if(saved) {
             try {
                 const parsed = JSON.parse(saved);
-                if(parsed.upgrades && parsed.upgrades.length === 30) {
+                if(parsed && parsed.upgrades && parsed.upgrades.length === 30) {
+                    game.money = parsed.money ?? 0;
+                    game.pwr = parsed.pwr ?? 1;
+                    game.xp = parsed.xp ?? 0;
+                    game.lvl = parsed.lvl ?? 1;
+                    game.nextXp = parsed.nextXp ?? 80;
+                    game.prestigeCount = parsed.prestigeCount ?? 0;
                     game.upgrades = parsed.upgrades;
                 }
-                game.money = parsed.money ?? 0;
-                game.pwr = parsed.pwr ?? 1;
-                game.xp = parsed.xp ?? 0;
-                game.lvl = parsed.lvl ?? 1;
-                game.nextXp = parsed.nextXp ?? 80;
-                game.prestigeCount = parsed.prestigeCount ?? 0;
             } catch(e) {
-                console.log("Ошибка сохраненных данных.");
+                console.log("Ошибка чтения сейвов, сброс.");
             }
         }
         
@@ -161,11 +161,11 @@
         updateUI();
     }
 
-    function handleInteraction(e) {
+    function handleInteraction() {
         lastTapTime = Date.now();
 
         if (!game.isRage) {
-            game.rage = Math.min(game.rage + 3, 100);
+            game.rage = Math.min(game.rage + 4, 100);
             if (game.rage >= 100) {
                 game.isRage = true;
                 document.body.classList.add('rage-active');
@@ -189,10 +189,7 @@
             notify("НОВЫЙ УРОВЕНЬ: " + game.lvl);
         }
 
-        let clickX = e.clientX || (e.touches ? e.touches[0].clientX : window.innerWidth / 2);
-        let clickY = e.clientY || (e.touches ? e.touches[0].clientY : window.innerHeight / 2);
-
-        createPopText(clickX, clickY, (crit ? "🔥 x5 " : "+") + Math.floor(finalValue).toLocaleString(), crit);
+        createPopText((crit ? "🔥 x5 " : "+") + Math.floor(finalValue).toLocaleString(), crit);
         updateUI();
         saveGame();
     }
@@ -221,14 +218,14 @@
         if (bar) bar.style.height = game.rage + "%";
     }
 
-    function createPopText(x, y, txt, isCrit) {
+    function createPopText(txt, isCrit) {
+        const wrap = document.getElementById('coin-wrap');
+        if(!wrap) return;
         const el = document.createElement('div');
         el.className = 'pop';
-        el.style.left = (x - 20) + 'px';
-        el.style.top = (y - 40) + 'px';
         el.style.color = isCrit ? "var(--gold)" : (game.isRage ? "var(--rage)" : "white");
         el.innerText = txt;
-        document.body.appendChild(el);
+        wrap.appendChild(el);
         setTimeout(() => el.remove(), 600);
     }
 
@@ -327,7 +324,7 @@
         if(shopList) shopList.innerHTML = htmlHtml;
     }
 
-    function saveGame() { localStorage.setItem('runUltimateSaveV3', JSON.stringify(game)); }
+    function saveGame() { localStorage.setItem('runUltimateSaveV4', JSON.stringify(game)); }
 
     function notify(msg) {
         const n = document.getElementById('notify-msg');
@@ -338,13 +335,12 @@
     }
 
     function hardReset() {
-        if(confirm("Очистить все данные?")) {
-            localStorage.clear();
-            location.reload();
-        }
+        localStorage.clear();
+        location.reload();
     }
 
-    window.onload = startLoading;
+    // Жесткий принудительный запуск
+    startLoading();
 </script>
 </body>
 </html>
