@@ -6,15 +6,17 @@
     <title>RUN - ULTIMATE CLICKER</title>
     <style>
         :root { --accent: #00f2ff; --bg: #05070a; --panel: #0d1117; --rage: #ff0050; --gold: #ffd700; }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; 
             margin: 0; display: flex; height: 100vh; overflow: hidden; user-select: none;
         }
+
+        /* Красный блок для отлова критических ошибок */
+        #debug-box { position: fixed; top: 0; left: 0; width: 100%; background: #ff0033; color: white; padding: 10px; font-weight: bold; z-index: 99999; display: none; font-size: 14px; text-align: center; }
         
-        /* Шкала Rage слева */
+        /* Шкала Rage */
         .rage-container { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); width: 12px; height: 250px; background: #161b22; border-radius: 10px; overflow: hidden; border: 1px solid #333; z-index: 100; }
         #rage-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--rage), #ff7b00); transition: height 0.1s linear; box-shadow: 0 0 15px var(--rage); }
 
@@ -26,11 +28,11 @@
         #xp-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.2s ease; }
 
         .stats-top { text-align: center; }
-        h1#money { font-size: 55px; margin: 5px 0; font-weight: 900; text-shadow: 0 0 25px rgba(0,242,255,0.3); }
+        h1#money { font-size: 50px; margin: 5px 0; font-weight: 900; text-shadow: 0 0 25px rgba(0,242,255,0.3); }
         .lvl-txt { color: var(--accent); font-weight: bold; letter-spacing: 2px; font-size: 14px; }
 
-        /* Зона клика и Монета */
-        #coin-wrap { width: 100%; max-width: 320px; height: 320px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        /* Монета */
+        #coin-wrap { width: 280px; height: 280px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
         .digital-coin { 
             width: 200px; height: 200px; background: radial-gradient(circle, #ffe566 0%, #cc9900 100%); 
             border: 6px solid #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -39,51 +41,58 @@
         }
         #coin-wrap:active .digital-coin { transform: scale(0.92); }
         
-        /* Скины монеты по уровням */
         .skin-iron { background: radial-gradient(circle, #ffffff 0%, #606c76 100%) !important; border-color: #b0c4de !important; color: #1f2421 !important; }
         .skin-diamond { background: radial-gradient(circle, #e6ffff 0%, #00a8cc 100%) !important; border-color: #00f2ff !important; color: #002d33 !important; }
 
-        /* Анимация ярости */
         .rage-active .digital-coin { animation: pulse-rage 0.1s infinite alternate; border-color: var(--rage) !important; box-shadow: 0 0 50px var(--rage) !important; }
         @keyframes pulse-rage { 0% { transform: scale(1); } 100% { transform: scale(0.96); } }
 
-        /* Адаптивный Магазин */
+        /* Магазин */
         .shop { width: 380px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 15px; }
         .shop-header { text-align: center; color: var(--accent); margin: 0 0 15px 0; letter-spacing: 2px; font-size: 20px; }
         .shop-container { flex: 1; overflow-y: auto; padding-right: 3px; }
 
-        /* Карточки апгрейдов */
+        /* Карточки */
         .item { background: #1c2128; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
         .item b { color: var(--accent); font-size: 15px; display: block; }
         .item small { color: #8b949e; display: block; margin: 2px 0 8px 0; }
         .item button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #238636; color: white; }
         .item button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
 
-        /* Кнопка Реборда */
         .reborn-card { background: linear-gradient(135deg, #1b160b 0%, #2d2206 100%); border: 1px solid var(--gold); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center; }
         .reborn-card b { color: var(--gold); font-size: 16px; display: block; margin-bottom: 4px; }
-        .reborn-card button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 900; cursor: pointer; background: var(--gold); color: black; box-shadow: 0 0 10px rgba(255,215,0,0.2); }
-        .reborn-card button:disabled { background: #21262d; color: #484f58; box-shadow: none; cursor: not-allowed; }
+        .reborn-card button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 900; cursor: pointer; background: var(--gold); color: black; }
+        .reborn-card button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
 
-        /* Тексты кликов */
-        .pop { position: absolute; pointer-events: none; animation: floatUp 0.6s ease-out forwards; font-weight: 900; font-size: 26px; z-index: 200; text-shadow: 2px 2px 0 #000; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) translateY(0); } 100% { opacity: 0; transform: translate(-50%, -50%) translateY(-100px); } }
+        /* Всплывающие цифры */
+        .pop { position: absolute; pointer-events: none; animation: floatUp 0.5s ease-out forwards; font-weight: 900; font-size: 26px; z-index: 200; text-shadow: 2px 2px 0 #000; text-align: center; width: 100px; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
 
-        /* Всплывающее уведомление на экране */
-        #notify-msg { position: absolute; top: 120px; background: rgba(0, 242, 255, 0.9); color: black; padding: 10px 25px; border-radius: 50px; font-weight: bold; opacity: 0; transition: opacity 0.3s ease; z-index: 1000; pointer-events: none; }
+        #notify-msg { position: absolute; top: 30px; background: rgba(0, 242, 255, 0.9); color: black; padding: 8px 20px; border-radius: 50px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none; }
 
-        /* Мобильная адаптация */
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; }
-            .rage-container { left: 10px; height: 180px; }
-            .shop { width: 100%; border-left: none; border-top: 2px solid #1f2937; height: 50vh; }
-            #coin-wrap { max-width: 240px; height: 240px; }
-            .digital-coin { width: 160px; height: 160px; font-size: 65px; }
+            .rage-container { left: 10px; height: 160px; }
+            .shop { width: 100%; border-left: none; border-top: 2px solid #1f2937; height: 45vh; }
+            #coin-wrap { width: 220px; height: 220px; }
+            .digital-coin { width: 150px; height: 150px; font-size: 60px; }
         }
     </style>
+    <script>
+        // Глобальный перехватчик ошибок кода
+        window.onerror = function(msg, url, line) {
+            var box = document.getElementById('debug-box');
+            if(box) {
+                box.style.display = 'block';
+                box.innerText = "Критическая ошибка скрипта: " + msg + " (Строка: " + line + ")";
+            }
+            return false;
+        };
+    </script>
 </head>
 <body>
 
+<div id="debug-box"></div>
 <div id="notify-msg">НОВЫЙ УРОВЕНЬ!</div>
 <div class="rage-container"><div id="rage-fill"></div></div>
 
@@ -95,13 +104,13 @@
     
     <div class="xp-wrapper"><div id="xp-bar"></div></div>
 
-    <div id="coin-wrap" onclick="handleInteraction()">
+    <div id="coin-wrap" onclick="handleInteraction(event)">
         <div id="coin" class="digital-coin">$</div>
     </div>
     
-    <p style="opacity: 0.5; font-size: 14px; margin: 5px 0;">
+    <p style="opacity: 0.5; font-size: 13px; margin: 5px 0;">
         Сила тапа: <span id="pwr-val" style="color:var(--accent)">1</span> 
-        <span id="mult-val" style="color:var(--gold); margin-left:10px;"></span>
+        <span id="mult-val" style="color:var(--gold); margin-left:5px;"></span>
     </p>
 </div>
 
@@ -110,17 +119,17 @@
     
     <div class="reborn-card">
         <b>ПЕРЕРОЖДЕНИЕ</b>
-        <small id="reborn-desc" style="display:block; margin-bottom:10px; color:#c9d1d9;">Требуется: 15 уровень</small>
-        <button id="reborn-btn" onclick="triggerReborn()">БЛОКИРОВАНО</button>
+        <small id="reborn-desc" style="display:block; margin-bottom:10px; color:#c9d1d9;">Загрузка...</small>
+        <button id="reborn-btn" onclick="triggerReborn()" disabled>БЛОКИРОВАНО</button>
     </div>
 
     <div class="shop-container" id="shop-list"></div>
-    <button onclick="hardReset()" style="margin-top:10px; opacity:0.1; background:none; color:white; border:none; cursor:pointer; font-size:11px;">Очистить сохранения</button>
+    <button onclick="hardReset()" style="margin-top:10px; opacity:0.2; background:none; color:white; border:none; cursor:pointer; font-size:11px; padding:5px;">Очистить сохранения</button>
 </div>
 
 <script>
     let game = {
-        money: 0, pwr: 1, xp: 0, lvl: 1, nextXp: 80,
+        money: 0, pwr: 1, xp: 0, lvl: 1, nextXp: 100,
         rage: 0, isRage: false, prestigeCount: 0, upgrades: []
     };
 
@@ -139,29 +148,46 @@
 
     function startLoading() {
         initShop();
-        const saved = localStorage.getItem('runUltimateSaveV4');
-        if(saved) {
-            try {
+        try {
+            const saved = localStorage.getItem('runUltimateSaveV5');
+            if(saved) {
                 const parsed = JSON.parse(saved);
                 if(parsed && parsed.upgrades && parsed.upgrades.length === 30) {
                     game.money = parsed.money ?? 0;
                     game.pwr = parsed.pwr ?? 1;
                     game.xp = parsed.xp ?? 0;
                     game.lvl = parsed.lvl ?? 1;
-                    game.nextXp = parsed.nextXp ?? 80;
+                    game.nextXp = parsed.nextXp ?? 100;
                     game.prestigeCount = parsed.prestigeCount ?? 0;
                     game.upgrades = parsed.upgrades;
                 }
-            } catch(e) {
-                console.log("Ошибка чтения сейвов, сброс.");
             }
+        } catch(e) {
+            console.log("Режим инкогнито: сохранения отключены.");
         }
         
-        startRageLogic();
+        // Цикл падения ярости
+        setInterval(() => {
+            let timePassed = Date.now() - lastTapTime;
+            if (timePassed > 1200) {
+                if (game.isRage) {
+                    game.rage -= 4;
+                    if (game.rage <= 0) {
+                        game.isRage = false;
+                        game.rage = 0;
+                        document.body.classList.remove('rage-active');
+                    }
+                } else {
+                    game.rage = Math.max(game.rage - 2, 0);
+                }
+                updateRageBar();
+            }
+        }, 100);
+
         updateUI();
     }
 
-    function handleInteraction() {
+    function handleInteraction(e) {
         lastTapTime = Date.now();
 
         if (!game.isRage) {
@@ -181,36 +207,18 @@
         let finalValue = game.pwr * totalMult;
         game.money += finalValue;
 
+        // Среднее усложнение уровней
         game.xp += 10;
         if (game.xp >= game.nextXp) {
             game.xp = 0;
             game.lvl++;
-            game.nextXp = Math.floor(game.nextXp * 1.45);
+            game.nextXp = Math.floor(game.lvl * 150); // Плавный и стабильный рост сложности
             notify("НОВЫЙ УРОВЕНЬ: " + game.lvl);
         }
 
-        createPopText((crit ? "🔥 x5 " : "+") + Math.floor(finalValue).toLocaleString(), crit);
+        createPopText(e, (crit ? "🔥 x5 " : "+") + Math.floor(finalValue).toLocaleString(), crit);
         updateUI();
         saveGame();
-    }
-
-    function startRageLogic() {
-        setInterval(() => {
-            let timePassed = Date.now() - lastTapTime;
-            if (timePassed > 1200) {
-                if (game.isRage) {
-                    game.rage -= 4;
-                    if (game.rage <= 0) {
-                        game.isRage = false;
-                        game.rage = 0;
-                        document.body.classList.remove('rage-active');
-                    }
-                } else {
-                    game.rage = Math.max(game.rage - 2, 0);
-                }
-                updateRageBar();
-            }
-        }, 100);
     }
 
     function updateRageBar() {
@@ -218,15 +226,21 @@
         if (bar) bar.style.height = game.rage + "%";
     }
 
-    function createPopText(txt, isCrit) {
+    function createPopText(e, txt, isCrit) {
         const wrap = document.getElementById('coin-wrap');
         if(!wrap) return;
+        
         const el = document.createElement('div');
         el.className = 'pop';
         el.style.color = isCrit ? "var(--gold)" : (game.isRage ? "var(--rage)" : "white");
         el.innerText = txt;
+        
+        // Безопасное позиционирование цифр по центру монеты
+        el.style.left = "35%";
+        el.style.top = "20%";
+        
         wrap.appendChild(el);
-        setTimeout(() => el.remove(), 600);
+        setTimeout(() => el.remove(), 500);
     }
 
     window.buyUpgrade = function(index) {
@@ -248,9 +262,9 @@
             game.pwr = 1;
             game.lvl = 1;
             game.xp = 0;
-            game.nextXp = 80;
+            game.nextXp = 100;
             initShop();
-            notify("ПЕРЕРОЖДЕНИЕ ВЫПОЛНЕНО!");
+            notify("ПЕРЕРОЖДЕНИЕ!");
             updateUI();
             saveGame();
         }
@@ -324,22 +338,26 @@
         if(shopList) shopList.innerHTML = htmlHtml;
     }
 
-    function saveGame() { localStorage.setItem('runUltimateSaveV4', JSON.stringify(game)); }
+    function saveGame() { 
+        try {
+            localStorage.setItem('runUltimateSaveV5', JSON.stringify(game)); 
+        } catch(e) {}
+    }
 
     function notify(msg) {
         const n = document.getElementById('notify-msg');
         if(!n) return;
         n.innerText = msg;
         n.style.opacity = "1";
-        setTimeout(() => { n.style.opacity = "0"; }, 2000);
+        setTimeout(() => { n.style.opacity = "0"; }, 1500);
     }
 
     function hardReset() {
-        localStorage.clear();
+        try { localStorage.clear(); } catch(e) {}
         location.reload();
     }
 
-    // Жесткий принудительный запуск
+    // Запуск игры
     startLoading();
 </script>
 </body>
