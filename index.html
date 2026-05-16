@@ -13,7 +13,6 @@
             margin: 0; display: flex; height: 100vh; overflow: hidden; user-select: none;
         }
 
-        /* Красный блок для отлова критических ошибок */
         #debug-box { position: fixed; top: 0; left: 0; width: 100%; background: #ff0033; color: white; padding: 10px; font-weight: bold; z-index: 99999; display: none; font-size: 14px; text-align: center; }
         
         /* Шкала Rage */
@@ -30,33 +29,46 @@
         .stats-top { text-align: center; }
         h1#money { font-size: 50px; margin: 5px 0; font-weight: 900; text-shadow: 0 0 25px rgba(0,242,255,0.3); }
         .lvl-txt { color: var(--accent); font-weight: bold; letter-spacing: 2px; font-size: 14px; }
+        #skin-label { font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
-        /* Монета */
+        /* Кликер-Элемент (Монета со скинами) */
         #coin-wrap { width: 280px; height: 280px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
         .digital-coin { 
-            width: 200px; height: 200px; background: radial-gradient(circle, #ffe566 0%, #cc9900 100%); 
-            border: 6px solid #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 80px; font-weight: 900; color: #664d00; transition: transform 0.05s;
-            box-shadow: 0 0 40px rgba(0,242,255,0.15);
+            width: 200px; height: 200px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 70px; transition: transform 0.05s; text-shadow: 0 2px 10px rgba(0,0,0,0.5); border: 6px solid;
         }
         #coin-wrap:active .digital-coin { transform: scale(0.92); }
         
-        .skin-iron { background: radial-gradient(circle, #ffffff 0%, #606c76 100%) !important; border-color: #b0c4de !important; color: #1f2421 !important; }
-        .skin-diamond { background: radial-gradient(circle, #e6ffff 0%, #00a8cc 100%) !important; border-color: #00f2ff !important; color: #002d33 !important; }
+        /* Стили скинов */
+        .skin-wood { background: radial-gradient(circle, #a0522d 0%, #5c2e16 100%) !important; border-color: #3d1e0e !important; box-shadow: 0 0 20px rgba(139,69,19,0.4); }
+        .skin-iron { background: radial-gradient(circle, #ffffff 0%, #606c76 100%) !important; border-color: #b0c4de !important; box-shadow: 0 0 25px rgba(255,255,255,0.25); }
+        .skin-gold { background: radial-gradient(circle, #ffe566 0%, #cc9900 100%) !important; border-color: #ffcc00 !important; box-shadow: 0 0 35px rgba(255,215,0,0.4); }
+        .skin-diamond { background: radial-gradient(circle, #e6ffff 0%, #00a8cc 100%) !important; border-color: #00f2ff !important; box-shadow: 0 0 45px rgba(0,242,255,0.5); }
+        .skin-cosmic { 
+            background: radial-gradient(circle, #3a0066 0%, #0f001a 100%) !important; border-color: #b300ff !important; 
+            box-shadow: 0 0 50px rgba(179,0,255,0.6); animation: cosmic-glow 1.5s infinite alternate; 
+        }
 
-        .rage-active .digital-coin { animation: pulse-rage 0.1s infinite alternate; border-color: var(--rage) !important; box-shadow: 0 0 50px var(--rage) !important; }
-        @keyframes pulse-rage { 0% { transform: scale(1); } 100% { transform: scale(0.96); } }
+        @keyframes cosmic-glow {
+            0% { box-shadow: 0 0 30px rgba(179,0,255,0.4); transform: scale(1); }
+            100% { box-shadow: 0 0 60px rgba(179,0,255,0.8); transform: scale(1.02); }
+        }
+
+        .rage-active .digital-coin { animation: pulse-rage 0.1s infinite alternate !important; border-color: var(--rage) !important; box-shadow: 0 0 60px var(--rage) !important; }
+        @keyframes pulse-rage { 0% { transform: scale(1); } 100% { transform: scale(0.95); } }
 
         /* Магазин */
         .shop { width: 380px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 15px; }
         .shop-header { text-align: center; color: var(--accent); margin: 0 0 15px 0; letter-spacing: 2px; font-size: 20px; }
         .shop-container { flex: 1; overflow-y: auto; padding-right: 3px; }
 
-        /* Карточки */
-        .item { background: #1c2128; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
-        .item b { color: var(--accent); font-size: 15px; display: block; }
-        .item small { color: #8b949e; display: block; margin: 2px 0 8px 0; }
-        .item button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #238636; color: white; }
+        /* Карточки товаров */
+        .item { background: #1c2128; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; flex-direction: column; }
+        .item-info { display: flex; justify-content: space-between; align-items: center; }
+        .item b { color: var(--accent); font-size: 15px; }
+        .item .count-badge { background: #21262d; padding: 2px 8px; border-radius: 20px; font-size: 12px; color: #8b949e; border: 1px solid #30363d; }
+        .item small { color: #8b949e; margin: 4px 0 8px 0; display: block; }
+        .item button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #238636; color: white; transition: background 0.2s; }
         .item button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
 
         .reborn-card { background: linear-gradient(135deg, #1b160b 0%, #2d2206 100%); border: 1px solid var(--gold); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center; }
@@ -64,7 +76,7 @@
         .reborn-card button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 900; cursor: pointer; background: var(--gold); color: black; }
         .reborn-card button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
 
-        /* Всплывающие цифры */
+        /* Всплывающий урон/клики */
         .pop { position: absolute; pointer-events: none; animation: floatUp 0.5s ease-out forwards; font-weight: 900; font-size: 26px; z-index: 200; text-shadow: 2px 2px 0 #000; text-align: center; width: 100px; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
 
@@ -73,9 +85,9 @@
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; }
             .rage-container { left: 10px; height: 160px; }
-            .shop { width: 100%; border-left: none; border-top: 2px solid #1f2937; height: 45vh; }
+            .shop { width: 100%; border-left: none; border-top: 2px solid #1f2937; height: 50vh; }
             #coin-wrap { width: 220px; height: 220px; }
-            .digital-coin { width: 150px; height: 150px; font-size: 60px; }
+            .digital-coin { width: 150px; height: 150px; font-size: 55px; }
         }
     </style>
     <script>
@@ -83,7 +95,7 @@
             var box = document.getElementById('debug-box');
             if(box) {
                 box.style.display = 'block';
-                box.innerText = "Критическая ошибка скрипта: " + msg + " (Строка: " + line + ")";
+                box.innerText = "Ошибка: " + msg + " (Строка: " + line + ")";
             }
             return false;
         };
@@ -98,13 +110,14 @@
 <div class="main">
     <div class="stats-top">
         <div id="lvl-txt" class="lvl-txt">УРОВЕНЬ 1</div>
+        <div id="skin-label">Скин: Дерево</div>
         <h1 id="money">$0</h1>
     </div>
     
     <div class="xp-wrapper"><div id="xp-bar"></div></div>
 
     <div id="coin-wrap" onclick="handleInteraction(event)">
-        <div id="coin" class="digital-coin">$</div>
+        <div id="coin" class="digital-coin">🪵</div>
     </div>
     
     <p style="opacity: 0.5; font-size: 13px; margin: 5px 0;">
@@ -134,24 +147,26 @@
 
     var lastTapTime = 0;
 
+    // Сбалансированный пресет бесконечных улучшений
+    var defaultUpgrades = [
+        { name: "Медный палец", cost: 15, bonus: 1, count: 0, costMult: 1.4 },
+        { name: "Железный клик", cost: 150, bonus: 8, count: 0, costMult: 1.45 },
+        { name: "Золотой зажим", cost: 1500, bonus: 70, count: 0, costMult: 1.5 },
+        { name: "Алмазный удар", cost: 18000, bonus: 600, count: 0, costMult: 1.55 },
+        { name: "Космический тап", cost: 250000, bonus: 7500, count: 0, costMult: 1.6 }
+    ];
+
     function initShop() {
-        game.upgrades = [];
-        for(var i = 1; i <= 30; i++) {
-            game.upgrades.push({
-                name: "Улучшение Ранга " + i,
-                cost: Math.floor(15 * Math.pow(1.68, i)),
-                bonus: Math.floor(3 * Math.pow(1.58, i))
-            });
-        }
+        game.upgrades = JSON.parse(JSON.stringify(defaultUpgrades));
     }
 
     function startLoading() {
         initShop();
         try {
-            var saved = localStorage.getItem('runUltimateSaveV5');
+            var saved = localStorage.getItem('runUltimateSaveV6');
             if(saved) {
                 var parsed = JSON.parse(saved);
-                if(parsed && parsed.upgrades && parsed.upgrades.length === 30) {
+                if(parsed && parsed.upgrades && parsed.upgrades.length === defaultUpgrades.length) {
                     game.money = parsed.money ?? 0;
                     game.pwr = parsed.pwr ?? 1;
                     game.xp = parsed.xp ?? 0;
@@ -248,7 +263,8 @@
         if (game.money >= u.cost) {
             game.money -= u.cost;
             game.pwr += u.bonus;
-            u.cost = Math.floor(u.cost * 1.55);
+            u.count++;
+            u.cost = Math.floor(u.cost * u.costMult);
             updateUI();
             saveGame();
         }
@@ -272,16 +288,31 @@
 
     function updateSkin() {
         var c = document.getElementById('coin');
+        var label = document.getElementById('skin-label');
         if (!c) return;
-        if (game.lvl > 15) {
-            c.className = "digital-coin skin-diamond";
-            c.innerText = "✦";
-        } else if (game.lvl > 7) {
-            c.className = "digital-coin skin-iron";
-            c.innerText = "♦️";
+        
+        c.className = "digital-coin";
+        
+        if (game.lvl >= 36) {
+            c.classList.add('skin-cosmic');
+            c.innerText = "🌌";
+            if(label) label.innerText = "Скин: Космос";
+        } else if (game.lvl >= 21) {
+            c.classList.add('skin-diamond');
+            c.innerText = "💎";
+            if(label) label.innerText = "Скин: Алмаз";
+        } else if (game.lvl >= 13) {
+            c.classList.add('skin-gold');
+            c.innerText = "👑";
+            if(label) label.innerText = "Скин: Золото";
+        } else if (game.lvl >= 6) {
+            c.classList.add('skin-iron');
+            c.innerText = "🪙";
+            if(label) label.innerText = "Скин: Железо";
         } else {
-            c.className = "digital-coin";
-            c.innerText = "$";
+            c.classList.add('skin-wood');
+            c.innerText = "🪵";
+            if(label) label.innerText = "Скин: Дерево";
         }
     }
 
@@ -334,7 +365,10 @@
             var isDisabled = canBuy ? "" : "disabled";
             
             htmlHtml += '<div class="item">' +
+                        '<div class="item-info">' +
                         '<b>' + u.name + '</b>' +
+                        '<span class="count-badge">Ур. ' + u.count + '</span>' +
+                        '</div>' +
                         '<small>Эффект: +' + (u.bonus * totalMult).toLocaleString() + ' к клику</small>' +
                         '<button onclick="buyUpgrade(' + i + ')" ' + isDisabled + '>$' + u.cost.toLocaleString() + '</button>' +
                         '</div>';
@@ -346,7 +380,7 @@
 
     function saveGame() { 
         try {
-            localStorage.setItem('runUltimateSaveV5', JSON.stringify(game)); 
+            localStorage.setItem('runUltimateSaveV6', JSON.stringify(game)); 
         } catch(e) {}
     }
 
