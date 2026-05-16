@@ -30,7 +30,7 @@
         .lvl-txt { color: var(--accent); font-weight: bold; letter-spacing: 2px; font-size: 14px; }
 
         /* Зона клика и Монета */
-        #coin-wrap { width: 100%; max-width: 320px; height: 320px; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; }
+        #coin-wrap { width: 100%; max-width: 320px; height: 320px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .digital-coin { 
             width: 200px; height: 200px; background: radial-gradient(circle, #ffe566 0%, #cc9900 100%); 
             border: 6px solid #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -69,6 +69,9 @@
         .pop { position: absolute; pointer-events: none; animation: floatUp 0.6s ease-out forwards; font-weight: 900; font-size: 26px; z-index: 200; text-shadow: 2px 2px 0 #000; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.2); } }
 
+        /* Всплывающее уведомление на экране */
+        #notify-msg { position: absolute; top: 120px; background: rgba(0, 242, 255, 0.9); color: black; padding: 10px 25px; border-radius: 50px; font-weight: bold; opacity: 0; transition: opacity 0.3s ease; z-index: 1000; pointer-events: none; }
+
         /* Мобильная адаптация */
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; }
@@ -81,6 +84,7 @@
 </head>
 <body>
 
+<div id="notify-msg">НОВЫЙ УРОВЕНЬ!</div>
 <div class="rage-container"><div id="rage-fill"></div></div>
 
 <div class="main">
@@ -91,7 +95,7 @@
     
     <div class="xp-wrapper"><div id="xp-bar"></div></div>
 
-    <div id="coin-wrap">
+    <div id="coin-wrap" onclick="handleInteraction(event)">
         <div id="coin" class="digital-coin">$</div>
     </div>
     
@@ -107,7 +111,7 @@
     <div class="reborn-card">
         <b>ПЕРЕРОЖДЕНИЕ</b>
         <small id="reborn-desc" style="display:block; margin-bottom:10px; color:#c9d1d9;">Требуется: 15 уровень</small>
-        <button id="reborn-btn" onclick="triggerReborn()">СБРОСИТЬ РАДИ +100% СИЛЫ</button>
+        <button id="reborn-btn" onclick="triggerReborn()">БЛОКИРОВАНО</button>
     </div>
 
     <div class="shop-container" id="shop-list"></div>
@@ -115,14 +119,12 @@
 </div>
 
 <script>
-    // Игровое состояние
     let game = {
         money: 0, pwr: 1, xp: 0, lvl: 1, nextXp: 80,
         rage: 0, isRage: false, prestigeCount: 0, upgrades: []
     };
 
     let lastTapTime = 0;
-    let rageDecayInterval = null;
 
     function initShop() {
         game.upgrades = [];
@@ -137,30 +139,24 @@
 
     function startLoading() {
         initShop();
-        const saved = localStorage.getItem('runUltimateSaveV1');
+        const saved = localStorage.getItem('runUltimateSaveV2');
         if(saved) {
-            const parsed = JSON.parse(saved);
-            // Мержим старые сохранения аккуратно
-            if(parsed.upgrades && parsed.upgrades.length === game.upgrades.length) {
-                game.upgrades = parsed.upgrades;
+            try {
+                const parsed = JSON.parse(saved);
+                if(parsed.upgrades && parsed.upgrades.length === 30) {
+                    game.upgrades = parsed.upgrades;
+                }
+                game.money = parsed.money ?? 0;
+                game.pwr = parsed.pwr ?? 1;
+                game.xp = parsed.xp ?? 0;
+                game.lvl = parsed.lvl ?? 1;
+                game.nextXp = parsed.nextXp ?? 80;
+                game.prestigeCount = parsed.prestigeCount ?? 0;
+            } catch(e) {
+                console.log("Ошибка загрузки, создаем чистый профиль");
             }
-            game.money = parsed.money ?? 0;
-            game.pwr = parsed.pwr ?? 1;
-            game.xp = parsed.xp ?? 0;
-            game.lvl = parsed.lvl ?? 1;
-            game.nextXp = parsed.nextXp ?? 80;
-            game.prestigeCount = parsed.prestigeCount ?? 0;
         }
         
-        // Привязываем события мыши и тач-события для мобилок
-        const coin = document.getElementById('coin-wrap');
-        coin.addEventListener('mousedown', handleInteraction);
-        coin.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            handleInteraction(e.changedTouches[0]);
-        });
-
-        // Запуск пассивного контроля шкалы ярости
         startRageLogic();
         updateUI();
     }
@@ -168,7 +164,6 @@
     function handleInteraction(e) {
         lastTapTime = Date.now();
 
-        // Логика накопления ярости
         if (!game.isRage) {
             game.rage = Math.min(game.rage + 3, 100);
             if (game.rage >= 100) {
@@ -177,40 +172,38 @@
             }
         }
 
-        // Расчет заработка с учетом ярости и ребордов
-        let currentMultiplier = (1 + game.prestigeCount); 
-        if (game.isRage) currentMultiplier *= 2;
+        let totalMult = (1 + game.prestigeCount); 
+        if (game.isRage) totalMult *= 2;
 
         let crit = Math.random() < 0.12;
-        if (crit) currentMultiplier *= 5;
+        if (crit) totalMult *= 5;
 
-        let finalValue = game.pwr * currentMultiplier;
+        let finalValue = game.pwr * totalMult;
         game.money += finalValue;
 
-        // Опыт плавно усложняется с каждым уровнем (коэффициент 1.45)
         game.xp += 10;
         if (game.xp >= game.nextXp) {
             game.xp = 0;
             game.lvl++;
             game.nextXp = Math.floor(game.nextXp * 1.45);
-            notify("НОВЫЙ УРОВЕНЬ!");
+            notify("НОВЫЙ УРОВЕНЬ: " + game.lvl);
         }
 
-        createPopText(e.clientX, e.clientY, (crit ? "🔥 x5 " : "+") + Math.floor(finalValue).toLocaleString(), crit);
+        // Берем координаты мыши или пальца для анимации цифр
+        let clickX = e.clientX || (e.touches ? e.touches[0].clientX : window.innerWidth / 2);
+        let clickY = e.clientY || (e.touches ? e.touches[0].clientY : window.innerHeight / 2);
+
+        createPopText(clickX, clickY, (crit ? "🔥 x5 " : "+") + Math.floor(finalValue).toLocaleString(), crit);
         updateUI();
         saveGame();
     }
 
     function startRageLogic() {
-        if(rageDecayInterval) clearInterval(rageDecayInterval);
-        
-        rageDecayInterval = setInterval(() => {
+        setInterval(() => {
             let timePassed = Date.now() - lastTapTime;
-            
-            // Если игрок НЕ кликает дольше 1.2 секунды — шкала начинает падать
             if (timePassed > 1200) {
                 if (game.isRage) {
-                    game.rage -= 4; // В режиме ярости падает быстрее
+                    game.rage -= 4;
                     if (game.rage <= 0) {
                         game.isRage = false;
                         game.rage = 0;
@@ -231,9 +224,8 @@
     function createPopText(x, y, txt, isCrit) {
         const el = document.createElement('div');
         el.className = 'pop';
-        // Центрируем текст на мобилках, если координаты улетели
-        el.style.left = (x ? x - 20 : window.innerWidth / 2) + 'px';
-        el.style.top = (y ? y - 20 : window.innerHeight / 2) + 'px';
+        el.style.left = (x - 20) + 'px';
+        el.style.top = (y - 40) + 'px';
         el.style.color = isCrit ? "var(--gold)" : (game.isRage ? "var(--rage)" : "white");
         el.innerText = txt;
         document.body.appendChild(el);
@@ -252,8 +244,8 @@
     };
 
     window.triggerReborn = function() {
-        let neededLvl = 15 + (game.prestigeCount * 5);
-        if (game.lvl >= neededLvl) {
+        let nextRebornLvl = 15 + (game.prestigeCount * 5);
+        if (game.lvl >= nextRebornLvl) {
             game.prestigeCount++;
             game.money = 0;
             game.pwr = 1;
@@ -282,55 +274,4 @@
     }
 
     function updateUI() {
-        // Основные показатели
-        document.getElementById('money').innerText = "$" + Math.floor(game.money).toLocaleString();
-        document.getElementById('lvl-txt').innerText = "УРОВЕНЬ " + game.lvl;
-        
-        let totalMult = (1 + game.prestigeCount);
-        document.getElementById('pwr-val').innerText = game.pwr.toLocaleString();
-        document.getElementById('mult-val').innerText = game.prestigeCount > 0 ? (Множитель: x${totalMult}) : "";
-        
-        // Полоса XP
-        let xpPercent = (game.xp / game.nextXp) * 100;
-        document.getElementById('xp-bar').style.width = xpPercent + "%";
-        updateRageBar();
-        updateSkin();
-
-        // Обновление состояния Реборда
-        let nextRebornLvl = 15 + (game.prestigeCount * 5);
-        const rebornBtn = document.getElementById('reborn-btn');
-        document.getElementById('reborn-desc').innerText = Требуется уровень: ${nextRebornLvl} (Текущий: ${game.lvl});
-        
-        if (game.lvl >= nextRebornLvl) {
-            rebornBtn.disabled = false;
-            rebornBtn.innerText = ПЕРЕРОЖДЕНИЕ СЕЙЧАС (на x${totalMult + 1});
-        } else {
-            rebornBtn.disabled = true;
-            rebornBtn.innerText = БЛОКИРОВАНО;
-        }
-
-        // Рендеринг списка магазина
-        let htmlHtml = "";
-        game.upgrades.forEach((u, i) => {
-            const canBuy = game.money >= u.cost;
-            htmlHtml += `
-                <div class="item">
-                    <b>${u.name}</b>
-                    <small>Эффект: +${(u.bonus * totalMult).toLocaleString()} к клику</small>
-                    <button onclick="buyUpgrade(${i})" ${canBuy ? '' : 'disabled'}>
-                        $${u.cost.toLocaleString()}
-                    </button>
-                </div>
-            `;
-        });
-        document.getElementById('shop-list').innerHTML = htmlHtml;
-    }
-
-    function saveGame() { localStorage.setItem('runUltimateSaveV1', JSON.stringify(game)); }
-    function notify(msg) { alert(msg); } // Надёжное оповещение, работающее везде
-    function hardReset() { if(confirm("Сбросить всё вообще?")) { localStorage.clear(); location.reload(); } }
-
-    window.onload = startLoading;
-</script>
-</body>
-</html>
+        document.getElementById('money
