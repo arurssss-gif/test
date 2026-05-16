@@ -79,7 +79,6 @@
         }
     </style>
     <script>
-        // Глобальный перехватчик ошибок кода
         window.onerror = function(msg, url, line) {
             var box = document.getElementById('debug-box');
             if(box) {
@@ -128,16 +127,16 @@
 </div>
 
 <script>
-    let game = {
+    var game = {
         money: 0, pwr: 1, xp: 0, lvl: 1, nextXp: 100,
         rage: 0, isRage: false, prestigeCount: 0, upgrades: []
     };
 
-    let lastTapTime = 0;
+    var lastTapTime = 0;
 
     function initShop() {
         game.upgrades = [];
-        for(let i = 1; i <= 30; i++) {
+        for(var i = 1; i <= 30; i++) {
             game.upgrades.push({
                 name: "Улучшение Ранга " + i,
                 cost: Math.floor(15 * Math.pow(1.68, i)),
@@ -149,9 +148,9 @@
     function startLoading() {
         initShop();
         try {
-            const saved = localStorage.getItem('runUltimateSaveV5');
+            var saved = localStorage.getItem('runUltimateSaveV5');
             if(saved) {
-                const parsed = JSON.parse(saved);
+                var parsed = JSON.parse(saved);
                 if(parsed && parsed.upgrades && parsed.upgrades.length === 30) {
                     game.money = parsed.money ?? 0;
                     game.pwr = parsed.pwr ?? 1;
@@ -163,12 +162,11 @@
                 }
             }
         } catch(e) {
-            console.log("Режим инкогнито: сохранения отключены.");
+            console.log("Сохранения недоступны.");
         }
         
-        // Цикл падения ярости
-        setInterval(() => {
-            let timePassed = Date.now() - lastTapTime;
+        setInterval(function() {
+            var timePassed = Date.now() - lastTapTime;
             if (timePassed > 1200) {
                 if (game.isRage) {
                     game.rage -= 4;
@@ -198,21 +196,20 @@
             }
         }
 
-        let totalMult = (1 + game.prestigeCount); 
+        var totalMult = (1 + game.prestigeCount); 
         if (game.isRage) totalMult *= 2;
 
-        let crit = Math.random() < 0.12;
+        var crit = Math.random() < 0.12;
         if (crit) totalMult *= 5;
 
-        let finalValue = game.pwr * totalMult;
+        var finalValue = game.pwr * totalMult;
         game.money += finalValue;
 
-        // Среднее усложнение уровней
         game.xp += 10;
         if (game.xp >= game.nextXp) {
             game.xp = 0;
             game.lvl++;
-            game.nextXp = Math.floor(game.lvl * 150); // Плавный и стабильный рост сложности
+            game.nextXp = Math.floor(game.lvl * 150);
             notify("НОВЫЙ УРОВЕНЬ: " + game.lvl);
         }
 
@@ -222,29 +219,32 @@
     }
 
     function updateRageBar() {
-        let bar = document.getElementById('rage-fill');
+        var bar = document.getElementById('rage-fill');
         if (bar) bar.style.height = game.rage + "%";
     }
 
     function createPopText(e, txt, isCrit) {
-        const wrap = document.getElementById('coin-wrap');
+        var wrap = document.getElementById('coin-wrap');
         if(!wrap) return;
         
-        const el = document.createElement('div');
+        var el = document.createElement('div');
         el.className = 'pop';
-        el.style.color = isCrit ? "var(--gold)" : (game.isRage ? "var(--rage)" : "white");
-        el.innerText = txt;
         
-        // Безопасное позиционирование цифр по центру монеты
+        var textColor = "white";
+        if (isCrit) { textColor = "var(--gold)"; }
+        else if (game.isRage) { textColor = "var(--rage)"; }
+        el.style.color = textColor;
+        
+        el.innerText = txt;
         el.style.left = "35%";
         el.style.top = "20%";
         
         wrap.appendChild(el);
-        setTimeout(() => el.remove(), 500);
+        setTimeout(function() { el.remove(); }, 500);
     }
 
     window.buyUpgrade = function(index) {
-        let u = game.upgrades[index];
+        var u = game.upgrades[index];
         if (game.money >= u.cost) {
             game.money -= u.cost;
             game.pwr += u.bonus;
@@ -255,7 +255,7 @@
     };
 
     window.triggerReborn = function() {
-        let nextRebornLvl = 15 + (game.prestigeCount * 5);
+        var nextRebornLvl = 15 + (game.prestigeCount * 5);
         if (game.lvl >= nextRebornLvl) {
             game.prestigeCount++;
             game.money = 0;
@@ -271,7 +271,7 @@
     };
 
     function updateSkin() {
-        const c = document.getElementById('coin');
+        var c = document.getElementById('coin');
         if (!c) return;
         if (game.lvl > 15) {
             c.className = "digital-coin skin-diamond";
@@ -286,55 +286,61 @@
     }
 
     function updateUI() {
-        let moneyEl = document.getElementById('money');
-        let lvlEl = document.getElementById('lvl-txt');
-        let pwrEl = document.getElementById('pwr-val');
-        let multEl = document.getElementById('mult-val');
-        let xpBarEl = document.getElementById('xp-bar');
+        var moneyEl = document.getElementById('money');
+        var lvlEl = document.getElementById('lvl-txt');
+        var pwrEl = document.getElementById('pwr-val');
+        var multEl = document.getElementById('mult-val');
+        var xpBarEl = document.getElementById('xp-bar');
 
         if(moneyEl) moneyEl.innerText = "$" + Math.floor(game.money).toLocaleString();
         if(lvlEl) lvlEl.innerText = "УРОВЕНЬ " + game.lvl;
         
-        let totalMult = (1 + game.prestigeCount);
+        var totalMult = (1 + game.prestigeCount);
         if(pwrEl) pwrEl.innerText = game.pwr.toLocaleString();
-        if(multEl) multEl.innerText = game.prestigeCount > 0 ? (Множитель: x${totalMult}) : "";
         
-        let xpPercent = (game.xp / game.nextXp) * 100;
+        if(multEl) {
+            if (game.prestigeCount > 0) {
+                multEl.innerText = "(Множитель: x" + totalMult + ")";
+            } else {
+                multEl.innerText = "";
+            }
+        }
+        
+        var xpPercent = (game.xp / game.nextXp) * 100;
         if(xpBarEl) xpBarEl.style.width = xpPercent + "%";
         
         updateRageBar();
         updateSkin();
 
-        let nextRebornLvl = 15 + (game.prestigeCount * 5);
-        const rebornBtn = document.getElementById('reborn-btn');
-        const rebornDesc = document.getElementById('reborn-desc');
+        var nextRebornLvl = 15 + (game.prestigeCount * 5);
+        var rebornBtn = document.getElementById('reborn-btn');
+        var rebornDesc = document.getElementById('reborn-desc');
         
-        if (rebornDesc) rebornDesc.innerText = Требуется уровень: ${nextRebornLvl} (Текущий: ${game.lvl});
+        if (rebornDesc) rebornDesc.innerText = "Требуется уровень: " + nextRebornLvl + " (Текущий: " + game.lvl + ")";
         
         if (rebornBtn) {
             if (game.lvl >= nextRebornLvl) {
                 rebornBtn.disabled = false;
-                rebornBtn.innerText = ПЕРЕРОЖДЕНИЕ (на x${totalMult + 1});
+                rebornBtn.innerText = "ПЕРЕРОЖДЕНИЕ (на x" + (totalMult + 1) + ")";
             } else {
                 rebornBtn.disabled = true;
-                rebornBtn.innerText = БЛОКИРОВАНО;
+                rebornBtn.innerText = "БЛОКИРОВАНО";
             }
         }
 
-        let htmlHtml = "";
-        game.upgrades.forEach((u, i) => {
-            const canBuy = game.money >= u.cost;
-            htmlHtml += `
-                <div class="item">
-                    <b>${u.name}</b>
-                    <small>Эффект: +${(u.bonus * totalMult).toLocaleString()} к клику</small>
-                    <button onclick="buyUpgrade(${i})" ${canBuy ? '' : 'disabled'}>
-                        $${u.cost.toLocaleString()}
-                    </button>
-                </div>
-            `;
+        var htmlHtml = "";
+        game.upgrades.forEach(function(u, i) {
+            var canBuy = game.money >= u.cost;
+            var isDisabled = canBuy ? "" : "disabled";
+            
+            htmlHtml += '<div class="item">' +
+                        '<b>' + u.name + '</b>' +
+                        '<small>Эффект: +' + (u.bonus * totalMult).toLocaleString() + ' к клику</small>' +
+                        '<button onclick="buyUpgrade(' + i + ')" ' + isDisabled + '>$' + u.cost.toLocaleString() + '</button>' +
+                        '</div>';
         });
-        let shopList = document.getElementById('shop-list');
+        
+        var shopList = document.getElementById('shop-list');
         if(shopList) shopList.innerHTML = htmlHtml;
     }
 
@@ -345,11 +351,11 @@
     }
 
     function notify(msg) {
-        const n = document.getElementById('notify-msg');
+        var n = document.getElementById('notify-msg');
         if(!n) return;
         n.innerText = msg;
         n.style.opacity = "1";
-        setTimeout(() => { n.style.opacity = "0"; }, 1500);
+        setTimeout(function() { n.style.opacity = "0"; }, 1500);
     }
 
     function hardReset() {
@@ -357,7 +363,6 @@
         location.reload();
     }
 
-    // Запуск игры
     startLoading();
 </script>
 </body>
