@@ -17,7 +17,7 @@
         
         /* Шкала Rage */
         .rage-container { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); width: 12px; height: 250px; background: #161b22; border-radius: 10px; overflow: hidden; border: 1px solid #333; z-index: 100; }
-        #rage-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--rage), #ff7b00); transition: height 0.1s linear; box-shadow: 0 0 15px var(--rage); }
+        #rage-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--rage), #ff7b00); transition: height 0.05s linear; box-shadow: 0 0 15px var(--rage); }
 
         /* Главный экран */
         .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; }
@@ -76,7 +76,7 @@
         .reborn-card button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 900; cursor: pointer; background: var(--gold); color: black; }
         .reborn-card button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
 
-        /* Всплывающий урон/клики */
+        /* Всплывающие цифры */
         .pop { position: absolute; pointer-events: none; animation: floatUp 0.5s ease-out forwards; font-weight: 900; font-size: 26px; z-index: 200; text-shadow: 2px 2px 0 #000; text-align: center; width: 100px; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
 
@@ -145,15 +145,20 @@
         rage: 0, isRage: false, prestigeCount: 0, upgrades: []
     };
 
-    var lastTapTime = 0;
-
-    // Сбалансированный пресет бесконечных улучшений
+    // Линейка из 12 уникальных апгрейдов сбалансированной сложности
     var defaultUpgrades = [
-        { name: "Медный палец", cost: 15, bonus: 1, count: 0, costMult: 1.4 },
-        { name: "Железный клик", cost: 150, bonus: 8, count: 0, costMult: 1.45 },
-        { name: "Золотой зажим", cost: 1500, bonus: 70, count: 0, costMult: 1.5 },
-        { name: "Алмазный удар", cost: 18000, bonus: 600, count: 0, costMult: 1.55 },
-        { name: "Космический тап", cost: 250000, bonus: 7500, count: 0, costMult: 1.6 }
+        { name: "Медный палец", cost: 10, bonus: 1, count: 0, costMult: 1.28 },
+        { name: "Железный клик", cost: 120, bonus: 6, count: 0, costMult: 1.32 },
+        { name: "Стальной курсор", cost: 600, bonus: 25, count: 0, costMult: 1.35 },
+        { name: "Бронзовый буст", cost: 3200, bonus: 110, count: 0, costMult: 1.38 },
+        { name: "Золотой зажим", cost: 15000, bonus: 480, count: 0, costMult: 1.42 },
+        { name: "Рубиновый тап", cost: 85000, bonus: 2200, count: 0, costMult: 1.45 },
+        { name: "Сапфировый кликер", cost: 450000, bonus: 9800, count: 0, costMult: 1.48 },
+        { name: "Алмазный удар", cost: 2400000, bonus: 45000, count: 0, costMult: 1.50 },
+        { name: "Аметистовый взрыв", cost: 14000000, bonus: 210000, count: 0, costMult: 1.53 },
+        { name: "Платиновое касание", cost: 80000000, bonus: 990000, count: 0, costMult: 1.56 },
+        { name: "Квантовый щелчок", cost: 500000000, bonus: 4800000, count: 0, costMult: 1.60 },
+        { name: "Космическая сила", cost: 4000000000, bonus: 25000000, count: 0, costMult: 1.65 }
     ];
 
     function initShop() {
@@ -163,7 +168,7 @@
     function startLoading() {
         initShop();
         try {
-            var saved = localStorage.getItem('runUltimateSaveV6');
+            var saved = localStorage.getItem('runUltimateSaveV7');
             if(saved) {
                 var parsed = JSON.parse(saved);
                 if(parsed && parsed.upgrades && parsed.upgrades.length === defaultUpgrades.length) {
@@ -180,31 +185,29 @@
             console.log("Сохранения недоступны.");
         }
         
+        // Переделанный цикл ярости: падает мгновенно и равномерно без задержек
         setInterval(function() {
-            var timePassed = Date.now() - lastTapTime;
-            if (timePassed > 1200) {
+            if (game.rage > 0) {
                 if (game.isRage) {
-                    game.rage -= 4;
+                    game.rage -= 1.5; // Скорость падения во время ярости
                     if (game.rage <= 0) {
                         game.isRage = false;
                         game.rage = 0;
                         document.body.classList.remove('rage-active');
                     }
                 } else {
-                    game.rage = Math.max(game.rage - 2, 0);
+                    game.rage = Math.max(game.rage - 0.8, 0); // Обычное равномерное падение
                 }
                 updateRageBar();
             }
-        }, 100);
+        }, 50); // Частота проверки увеличена для максимальной плавности движения
 
         updateUI();
     }
 
     function handleInteraction(e) {
-        lastTapTime = Date.now();
-
         if (!game.isRage) {
-            game.rage = Math.min(game.rage + 4, 100);
+            game.rage = Math.min(game.rage + 5, 100);
             if (game.rage >= 100) {
                 game.isRage = true;
                 document.body.classList.add('rage-active');
@@ -380,7 +383,7 @@
 
     function saveGame() { 
         try {
-            localStorage.setItem('runUltimateSaveV6', JSON.stringify(game)); 
+            localStorage.setItem('runUltimateSaveV7', JSON.stringify(game)); 
         } catch(e) {}
     }
 
