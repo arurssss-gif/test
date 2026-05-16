@@ -2,171 +2,335 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUN - GOD CLICKER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RUN - ULTIMATE CLICKER</title>
     <style>
         :root { --accent: #00f2ff; --bg: #05070a; --panel: #0d1117; --rage: #ff0050; --gold: #ffd700; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; user-select: none; }
         
-        .side-run { position: fixed; left: -10px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 100px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* Шкала Rage */
-        .rage-container { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); width: 10px; height: 250px; background: #161b22; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
-        #rage-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: var(--rage); transition: height 0.2s; box-shadow: 0 0 15px var(--rage); }
+        body { 
+            background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; height: 100vh; overflow: hidden; user-select: none;
+        }
+        
+        /* Шкала Rage слева */
+        .rage-container { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); width: 12px; height: 250px; background: #161b22; border-radius: 10px; overflow: hidden; border: 1px solid #333; z-index: 100; }
+        #rage-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--rage), #ff7b00); transition: height 0.1s linear; box-shadow: 0 0 15px var(--rage); }
 
-        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        /* Главный экран */
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; }
         
-        /* Магазин */
-        .shop { width: 380px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        #shop-list { flex: 1; overflow-y: auto; padding-right: 5px; }
+        /* Полоса уровня (XP) */
+        .xp-wrapper { width: 80%; max-width: 400px; background: #161b22; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 10px; border: 1px solid #21262d; }
+        #xp-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.2s ease; }
 
-        /* Монета */
-        #coin-wrap { width: 300px; height: 300px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; z-index: 10; }
+        .stats-top { text-align: center; }
+        h1#money { font-size: 55px; margin: 5px 0; font-weight: 900; text-shadow: 0 0 25px rgba(0,242,255,0.3); }
+        .lvl-txt { color: var(--accent); font-weight: bold; letter-spacing: 2px; font-size: 14px; }
+
+        /* Зона клика и Монета */
+        #coin-wrap { width: 100%; max-width: 320px; height: 320px; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; }
         .digital-coin { 
             width: 200px; height: 200px; background: radial-gradient(circle, #ffe566 0%, #cc9900 100%); 
             border: 6px solid #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-size: 80px; font-weight: 900; color: #664d00; transition: transform 0.05s;
-            box-shadow: 0 0 30px rgba(0,242,255,0.2);
+            box-shadow: 0 0 40px rgba(0,242,255,0.15);
         }
-        #coin-wrap:active .digital-coin { transform: scale(0.9); }
+        #coin-wrap:active .digital-coin { transform: scale(0.92); }
         
-        .rage-active .digital-coin { animation: shake 0.1s infinite; border-color: var(--rage); box-shadow: 0 0 50px var(--rage); }
-        @keyframes shake { 0%{transform: translate(1px, 1px)} 50%{transform: translate(-1px, -1px)} 100%{transform: translate(1px, -1px)} }
+        /* Скины монеты по уровням */
+        .skin-iron { background: radial-gradient(circle, #ffffff 0%, #606c76 100%) !important; border-color: #b0c4de !important; color: #1f2421 !important; }
+        .skin-diamond { background: radial-gradient(circle, #e6ffff 0%, #00a8cc 100%) !important; border-color: #00f2ff !important; color: #002d33 !important; }
 
-        h1#money { font-size: 60px; margin: 10px 0; text-shadow: 0 0 20px var(--accent); }
+        /* Анимация ярости */
+        .rage-active .digital-coin { animation: pulse-rage 0.1s infinite alternate; border-color: var(--rage) !important; box-shadow: 0 0 50px var(--rage) !important; }
+        @keyframes pulse-rage { 0% { transform: scale(1); } 100% { transform: scale(0.96); } }
+
+        /* Адаптивный Магазин */
+        .shop { width: 380px; background: var(--panel); border-left: 2px solid #1f2937; display: flex; flex-direction: column; padding: 15px; }
+        .shop-header { text-align: center; color: var(--accent); margin: 0 0 15px 0; letter-spacing: 2px; font-size: 20px; }
+        .shop-container { flex: 1; overflow-y: auto; padding-right: 3px; }
+
+        /* Карточки апгрейдов */
         .item { background: #1c2128; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+        .item b { color: var(--accent); font-size: 15px; display: block; }
+        .item small { color: #8b949e; display: block; margin: 2px 0 8px 0; }
         .item button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #238636; color: white; }
         .item button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
 
-        .pop { position: absolute; pointer-events: none; animation: popUp 0.6s forwards; font-weight: 900; font-size: 24px; z-index: 100; }
-        @keyframes popUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-100px); } }
+        /* Кнопка Реборда */
+        .reborn-card { background: linear-gradient(135deg, #1b160b 0%, #2d2206 100%); border: 1px solid var(--gold); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center; }
+        .reborn-card b { color: var(--gold); font-size: 16px; display: block; margin-bottom: 4px; }
+        .reborn-card button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 900; cursor: pointer; background: var(--gold); color: black; box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+        .reborn-card button:disabled { background: #21262d; color: #484f58; box-shadow: none; cursor: not-allowed; }
+
+        /* Тексты кликов */
+        .pop { position: absolute; pointer-events: none; animation: floatUp 0.6s ease-out forwards; font-weight: 900; font-size: 26px; z-index: 200; text-shadow: 2px 2px 0 #000; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.2); } }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .rage-container { left: 10px; height: 180px; }
+            .shop { width: 100%; border-left: none; border-top: 2px solid #1f2937; height: 50vh; }
+            #coin-wrap { max-width: 240px; height: 240px; }
+            .digital-coin { width: 160px; height: 160px; font-size: 65px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="side-run">RUN</div>
 <div class="rage-container"><div id="rage-fill"></div></div>
 
 <div class="main">
-    <div id="lvl" style="color:var(--accent); font-weight: bold;">LVL 1</div>
-    <h1 id="money">$0</h1>
+    <div class="stats-top">
+        <div id="lvl-txt" class="lvl-txt">УРОВЕНЬ 1</div>
+        <h1 id="money">$0</h1>
+    </div>
+    
+    <div class="xp-wrapper"><div id="xp-bar"></div></div>
+
     <div id="coin-wrap">
         <div id="coin" class="digital-coin">$</div>
     </div>
-    <p style="opacity: 0.5;">Мощность: <span id="pwr-val">1</span></p>
+    
+    <p style="opacity: 0.5; font-size: 14px; margin: 5px 0;">
+        Сила тапа: <span id="pwr-val" style="color:var(--accent)">1</span> 
+        <span id="mult-val" style="color:var(--gold); margin-left:10px;"></span>
+    </p>
 </div>
 
 <div class="shop">
-    <h3 style="text-align: center; color: var(--accent);">МАГАЗИН</h3>
-    <div id="shop-list"></div>
-    <button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; opacity:0.3; background:none; color:white; border:none; cursor:pointer;">Сброс</button>
+    <div class="shop-header">МАГАЗИН</div>
+    
+    <div class="reborn-card">
+        <b>ПЕРЕРОЖДЕНИЕ</b>
+        <small id="reborn-desc" style="display:block; margin-bottom:10px; color:#c9d1d9;">Требуется: 15 уровень</small>
+        <button id="reborn-btn" onclick="triggerReborn()">СБРОСИТЬ РАДИ +100% СИЛЫ</button>
+    </div>
+
+    <div class="shop-container" id="shop-list"></div>
+    <button onclick="hardReset()" style="margin-top:10px; opacity:0.1; background:none; color:white; border:none; cursor:pointer; font-size:11px;">Очистить сохранения</button>
 </div>
 
 <script>
-    // Все переменные в одном месте
-    let state = {
-        money: 0, pwr: 1, xp: 0, lvl: 1, nextXp: 100,
-        rage: 0, isRage: false, upgrades: []
+    // Игровое состояние
+    let game = {
+        money: 0, pwr: 1, xp: 0, lvl: 1, nextXp: 80,
+        rage: 0, isRage: false, prestigeCount: 0, upgrades: []
     };
 
-    // Принудительная инициализация
-    function init() {
-        state.upgrades = [];
-        for(let i=1; i<=30; i++) {
-            state.upgrades.push({
-                name: "Улучшение #" + i,
-                cost: Math.floor(20 * Math.pow(1.7, i)),
-                bonus: Math.floor(4 * Math.pow(1.6, i))
+    let lastTapTime = 0;
+    let rageDecayInterval = null;
+
+    function initShop() {
+        game.upgrades = [];
+        for(let i = 1; i <= 30; i++) {
+            game.upgrades.push({
+                name: "Улучшение Ранга " + i,
+                cost: Math.floor(15 * Math.pow(1.68, i)),
+                bonus: Math.floor(3 * Math.pow(1.58, i))
             });
         }
+    }
 
-        const saved = localStorage.getItem('runClickerSave');
+    function startLoading() {
+        initShop();
+        const saved = localStorage.getItem('runUltimateSaveV1');
         if(saved) {
-            const d = JSON.parse(saved);
-            Object.assign(state, d);
+            const parsed = JSON.parse(saved);
+            // Мержим старые сохранения аккуратно
+            if(parsed.upgrades && parsed.upgrades.length === game.upgrades.length) {
+                game.upgrades = parsed.upgrades;
+            }
+            game.money = parsed.money ?? 0;
+            game.pwr = parsed.pwr ?? 1;
+            game.xp = parsed.xp ?? 0;
+            game.lvl = parsed.lvl ?? 1;
+            game.nextXp = parsed.nextXp ?? 80;
+            game.prestigeCount = parsed.prestigeCount ?? 0;
         }
         
-        // Вешаем клик программно, чтобы точно работало
-        document.getElementById('coin-wrap').addEventListener('mousedown', handleTap);
+        // Привязываем события мыши и тач-события для мобилок
+        const coin = document.getElementById('coin-wrap');
+        coin.addEventListener('mousedown', handleInteraction);
+        coin.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            handleInteraction(e.changedTouches[0]);
+        });
+
+        // Запуск пассивного контроля шкалы ярости
+        startRageLogic();
         updateUI();
     }
 
-    function handleTap(e) {
-        if(!state.isRage) {
-            state.rage += 2;
-            if(state.rage >= 100) startRage();
+    function handleInteraction(e) {
+        lastTapTime = Date.now();
+
+        // Логика накопления ярости
+        if (!game.isRage) {
+            game.rage = Math.min(game.rage + 3, 100);
+            if (game.rage >= 100) {
+                game.isRage = true;
+                document.body.classList.add('rage-active');
+            }
         }
 
-        let crit = Math.random() < 0.15;
-        let val = state.pwr * (state.isRage ? 2 : 1) * (crit ? 6 : 1);
-        
-        state.money += val;
-        state.xp += 10;
-        
-        if(state.xp >= state.nextXp) {
-            state.lvl++; state.xp = 0; state.nextXp *= 1.6;
+        // Расчет заработка с учетом ярости и ребордов
+        let currentMultiplier = (1 + game.prestigeCount); 
+        if (game.isRage) currentMultiplier *= 2;
+
+        let crit = Math.random() < 0.12;
+        if (crit) currentMultiplier *= 5;
+
+        let finalValue = game.pwr * currentMultiplier;
+        game.money += finalValue;
+
+        // Опыт плавно усложняется с каждым уровнем (коэффициент 1.45)
+        game.xp += 10;
+        if (game.xp >= game.nextXp) {
+            game.xp = 0;
+            game.lvl++;
+            game.nextXp = Math.floor(game.nextXp * 1.45);
+            notify("НОВЫЙ УРОВЕНЬ!");
         }
 
-        spawnText(e.clientX, e.clientY, (crit ? "💥 " : "+") + Math.floor(val), crit);
+        createPopText(e.clientX, e.clientY, (crit ? "🔥 x5 " : "+") + Math.floor(finalValue).toLocaleString(), crit);
         updateUI();
-        save();
+        saveGame();
     }
 
-    function startRage() {
-        state.isRage = true;
-        document.getElementById('body')?.classList.add('rage-active'); // На всякий случай
-        document.body.classList.add('rage-active');
-        let t = setInterval(() => {
-            state.rage -= 1.5;
-            document.getElementById('rage-fill').style.height = state.rage + "%";
-            if(state.rage <= 0) {
-                state.isRage = false;
-                clearInterval(t);
-                document.body.classList.remove('rage-active');
+    function startRageLogic() {
+        if(rageDecayInterval) clearInterval(rageDecayInterval);
+        
+        rageDecayInterval = setInterval(() => {
+            let timePassed = Date.now() - lastTapTime;
+            
+            // Если игрок НЕ кликает дольше 1.2 секунды — шкала начинает падать
+            if (timePassed > 1200) {
+                if (game.isRage) {
+                    game.rage -= 4; // В режиме ярости падает быстрее
+                    if (game.rage <= 0) {
+                        game.isRage = false;
+                        game.rage = 0;
+                        document.body.classList.remove('rage-active');
+                    }
+                } else {
+                    game.rage = Math.max(game.rage - 2, 0);
+                }
+                updateRageBar();
             }
         }, 100);
     }
 
-    function spawnText(x, y, txt, crit) {
+    function updateRageBar() {
+        document.getElementById('rage-fill').style.height = game.rage + "%";
+    }
+
+    function createPopText(x, y, txt, isCrit) {
         const el = document.createElement('div');
         el.className = 'pop';
-        el.style.left = x + 'px'; el.style.top = y + 'px';
-        el.style.color = crit ? "var(--gold)" : "white";
+        // Центрируем текст на мобилках, если координаты улетели
+        el.style.left = (x ? x - 20 : window.innerWidth / 2) + 'px';
+        el.style.top = (y ? y - 20 : window.innerHeight / 2) + 'px';
+        el.style.color = isCrit ? "var(--gold)" : (game.isRage ? "var(--rage)" : "white");
         el.innerText = txt;
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 600);
     }
 
-    window.buy = function(i) {
-        let u = state.upgrades[i];
-        if(state.money >= u.cost) {
-            state.money -= u.cost;
-            state.pwr += u.bonus;
-            u.cost = Math.floor(u.cost * 1.5);
+    window.buyUpgrade = function(index) {
+        let u = game.upgrades[index];
+        if (game.money >= u.cost) {
+            game.money -= u.cost;
+            game.pwr += u.bonus;
+            u.cost = Math.floor(u.cost * 1.55);
             updateUI();
-            save();
+            saveGame();
         }
     };
 
-    function updateUI() {
-        document.getElementById('money').innerText = "$" + Math.floor(state.money).toLocaleString();
-        document.getElementById('pwr-val').innerText = state.pwr.toLocaleString();
-        document.getElementById('lvl').innerText = "LVL " + state.lvl;
-        document.getElementById('rage-fill').style.height = state.rage + "%";
+    window.triggerReborn = function() {
+        let neededLvl = 15 + (game.prestigeCount * 5);
+        if (game.lvl >= neededLvl) {
+            game.prestigeCount++;
+            game.money = 0;
+            game.pwr = 1;
+            game.lvl = 1;
+            game.xp = 0;
+            game.nextXp = 80;
+            initShop();
+            notify("ПЕРЕРОЖДЕНИЕ ВЫПОЛНЕНО!");
+            updateUI();
+            saveGame();
+        }
+    };
 
-        let h = "";
-        state.upgrades.forEach((u, i) => {
-            const canBuy = state.money >= u.cost;
-            h += `<div class="item"><b>${u.name}</b><br>
-                  <button onclick="buy(${i})" ${canBuy ? '' : 'disabled'}>$${u.cost.toLocaleString()}</button></div>`;
-        });
-        document.getElementById('shop-list').innerHTML = h;
+    function updateSkin() {
+        const c = document.getElementById('coin');
+        if (game.lvl > 15) {
+            c.className = "digital-coin skin-diamond";
+            c.innerText = "✦";
+        } else if (game.lvl > 7) {
+            c.className = "digital-coin skin-iron";
+            c.innerText = "♦️";
+        } else {
+            c.className = "digital-coin";
+            c.innerText = "$";
+        }
     }
 
-    function save() { localStorage.setItem('runClickerSave', JSON.stringify(state)); }
+    function updateUI() {
+        // Основные показатели
+        document.getElementById('money').innerText = "$" + Math.floor(game.money).toLocaleString();
+        document.getElementById('lvl-txt').innerText = "УРОВЕНЬ " + game.lvl;
+        
+        let totalMult = (1 + game.prestigeCount);
+        document.getElementById('pwr-val').innerText = game.pwr.toLocaleString();
+        document.getElementById('mult-val').innerText = game.prestigeCount > 0 ? (Множитель: x${totalMult}) : "";
+        
+        // Полоса XP
+        let xpPercent = (game.xp / game.nextXp) * 100;
+        document.getElementById('xp-bar').style.width = xpPercent + "%";
+        updateRageBar();
+        updateSkin();
 
-    // Старт
-    init();
+        // Обновление состояния Реборда
+        let nextRebornLvl = 15 + (game.prestigeCount * 5);
+        const rebornBtn = document.getElementById('reborn-btn');
+        document.getElementById('reborn-desc').innerText = Требуется уровень: ${nextRebornLvl} (Текущий: ${game.lvl});
+        
+        if (game.lvl >= nextRebornLvl) {
+            rebornBtn.disabled = false;
+            rebornBtn.innerText = ПЕРЕРОЖДЕНИЕ СЕЙЧАС (на x${totalMult + 1});
+        } else {
+            rebornBtn.disabled = true;
+            rebornBtn.innerText = БЛОКИРОВАНО;
+        }
+
+        // Рендеринг списка магазина
+        let htmlHtml = "";
+        game.upgrades.forEach((u, i) => {
+            const canBuy = game.money >= u.cost;
+            htmlHtml += `
+                <div class="item">
+                    <b>${u.name}</b>
+                    <small>Эффект: +${(u.bonus * totalMult).toLocaleString()} к клику</small>
+                    <button onclick="buyUpgrade(${i})" ${canBuy ? '' : 'disabled'}>
+                        $${u.cost.toLocaleString()}
+                    </button>
+                </div>
+            `;
+        });
+        document.getElementById('shop-list').innerHTML = htmlHtml;
+    }
+
+    function saveGame() { localStorage.setItem('runUltimateSaveV1', JSON.stringify(game)); }
+    function notify(msg) { alert(msg); } // Надёжное оповещение, работающее везде
+    function hardReset() { if(confirm("Сбросить всё вообще?")) { localStorage.clear(); location.reload(); } }
+
+    window.onload = startLoading;
 </script>
 </body>
 </html>
