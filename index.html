@@ -145,7 +145,8 @@
         rage: 0, isRage: false, prestigeCount: 0, upgrades: []
     };
 
-    // Линейка из 12 уникальных апгрейдов сбалансированной сложности
+    var lastTapTime = 0;
+
     var defaultUpgrades = [
         { name: "Медный палец", cost: 10, bonus: 1, count: 0, costMult: 1.28 },
         { name: "Железный клик", cost: 120, bonus: 6, count: 0, costMult: 1.32 },
@@ -168,7 +169,7 @@
     function startLoading() {
         initShop();
         try {
-            var saved = localStorage.getItem('runUltimateSaveV7');
+            var saved = localStorage.getItem('runUltimateSaveV8');
             if(saved) {
                 var parsed = JSON.parse(saved);
                 if(parsed && parsed.upgrades && parsed.upgrades.length === defaultUpgrades.length) {
@@ -185,29 +186,38 @@
             console.log("Сохранения недоступны.");
         }
         
-        // Переделанный цикл ярости: падает мгновенно и равномерно без задержек
+        // Новая логика падения ярости: работает ТОЛЬКО если игрок бездействует
         setInterval(function() {
+            var timePassed = Date.now() - lastTapTime;
+            
+            // Если с момента последнего тапа прошло меньше 350 миллисекунд — ярость НЕ падает!
+            if (timePassed < 350) {
+                return; 
+            }
+
             if (game.rage > 0) {
                 if (game.isRage) {
-                    game.rage -= 1.5; // Скорость падения во время ярости
+                    game.rage -= 2.0; // Быстрое падение шкалы, когда отпустил палец в режиме X2
                     if (game.rage <= 0) {
                         game.isRage = false;
                         game.rage = 0;
                         document.body.classList.remove('rage-active');
                     }
                 } else {
-                    game.rage = Math.max(game.rage - 0.8, 0); // Обычное равномерное падение
+                    game.rage = Math.max(game.rage - 1.5, 0); // Обычное плавное падение, если перестал тапать до режима X2
                 }
                 updateRageBar();
             }
-        }, 50); // Частота проверки увеличена для максимальной плавности движения
+        }, 50);
 
         updateUI();
     }
 
     function handleInteraction(e) {
+        lastTapTime = Date.now(); // Фиксируем время тапа
+
         if (!game.isRage) {
-            game.rage = Math.min(game.rage + 5, 100);
+            game.rage = Math.min(game.rage + 4, 100);
             if (game.rage >= 100) {
                 game.isRage = true;
                 document.body.classList.add('rage-active');
@@ -383,7 +393,7 @@
 
     function saveGame() { 
         try {
-            localStorage.setItem('runUltimateSaveV7', JSON.stringify(game)); 
+            localStorage.setItem('runUltimateSaveV8', JSON.stringify(game)); 
         } catch(e) {}
     }
 
