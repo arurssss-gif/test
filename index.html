@@ -169,7 +169,7 @@
     function startLoading() {
         initShop();
         try {
-            var saved = localStorage.getItem('runUltimateSaveV8');
+            var saved = localStorage.getItem('runUltimateSaveV9');
             if(saved) {
                 var parsed = JSON.parse(saved);
                 if(parsed && parsed.upgrades && parsed.upgrades.length === defaultUpgrades.length) {
@@ -186,25 +186,24 @@
             console.log("Сохранения недоступны.");
         }
         
-        // Новая логика падения ярости: работает ТОЛЬКО если игрок бездействует
+        // Постоянный цикл падения ярости (срабатывает, когда игрок бездействует)
         setInterval(function() {
             var timePassed = Date.now() - lastTapTime;
             
-            // Если с момента последнего тапа прошло меньше 350 миллисекунд — ярость НЕ падает!
-            if (timePassed < 350) {
-                return; 
-            }
+            // Если игрок активно кликает (пауза меньше 250мс) — шкала вообще не падает вниз
+            if (timePassed < 250) return; 
 
             if (game.rage > 0) {
                 if (game.isRage) {
-                    game.rage -= 2.0; // Быстрое падение шкалы, когда отпустил палец в режиме X2
-                    if (game.rage <= 0) {
+                    game.rage -= 1.5; // Скорость падения шкалы в режиме комбо
+                    
+                    // ГЛАВНОЕ ПРАВИЛО: Если ярость упала ниже 75%, режим x2 отключается
+                    if (game.rage < 75) {
                         game.isRage = false;
-                        game.rage = 0;
                         document.body.classList.remove('rage-active');
                     }
                 } else {
-                    game.rage = Math.max(game.rage - 1.5, 0); // Обычное плавное падение, если перестал тапать до режима X2
+                    game.rage = Math.max(game.rage - 1.2, 0); // Обычное плавное падение вне режима х2
                 }
                 updateRageBar();
             }
@@ -214,14 +213,16 @@
     }
 
     function handleInteraction(e) {
-        lastTapTime = Date.now(); // Фиксируем время тапа
+        lastTapTime = Date.now();
 
-        if (!game.isRage) {
-            game.rage = Math.min(game.rage + 4, 100);
-            if (game.rage >= 100) {
-                game.isRage = true;
-                document.body.classList.add('rage-active');
-            }
+        // Ярость заполняется от кликов ВСЕГДА (даже во время падения или активного х2 режима)
+        game.rage = Math.min(game.rage + 5, 100);
+
+        // Включение режима x2 происходит строго на 100% шкалы
+        if (game.rage >= 100 && !game.isRage) {
+            game.isRage = true;
+            document.body.classList.add('rage-active');
+            notify("ЯРОСТЬ Х2!");
         }
 
         var totalMult = (1 + game.prestigeCount); 
@@ -393,7 +394,7 @@
 
     function saveGame() { 
         try {
-            localStorage.setItem('runUltimateSaveV8', JSON.stringify(game)); 
+            localStorage.setItem('runUltimateSaveV9', JSON.stringify(game)); 
         } catch(e) {}
     }
 
