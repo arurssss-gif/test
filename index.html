@@ -82,7 +82,7 @@
         }
     </style>
 </head>
-<body>
+<body id="body">
 
 <div id="notify-msg">НОВЫЙ УРОВЕНЬ!</div>
 <div class="rage-container"><div id="rage-fill"></div></div>
@@ -139,7 +139,7 @@
 
     function startLoading() {
         initShop();
-        const saved = localStorage.getItem('runUltimateSaveV2');
+        const saved = localStorage.getItem('runUltimateSaveV3');
         if(saved) {
             try {
                 const parsed = JSON.parse(saved);
@@ -153,7 +153,7 @@
                 game.nextXp = parsed.nextXp ?? 80;
                 game.prestigeCount = parsed.prestigeCount ?? 0;
             } catch(e) {
-                console.log("Ошибка загрузки, создаем чистый профиль");
+                console.log("Ошибка сохраненных данных.");
             }
         }
         
@@ -189,7 +189,6 @@
             notify("НОВЫЙ УРОВЕНЬ: " + game.lvl);
         }
 
-        // Берем координаты мыши или пальца для анимации цифр
         let clickX = e.clientX || (e.touches ? e.touches[0].clientX : window.innerWidth / 2);
         let clickY = e.clientY || (e.touches ? e.touches[0].clientY : window.innerHeight / 2);
 
@@ -218,7 +217,8 @@
     }
 
     function updateRageBar() {
-        document.getElementById('rage-fill').style.height = game.rage + "%";
+        let bar = document.getElementById('rage-fill');
+        if (bar) bar.style.height = game.rage + "%";
     }
 
     function createPopText(x, y, txt, isCrit) {
@@ -261,6 +261,7 @@
 
     function updateSkin() {
         const c = document.getElementById('coin');
+        if (!c) return;
         if (game.lvl > 15) {
             c.className = "digital-coin skin-diamond";
             c.innerText = "✦";
@@ -274,4 +275,76 @@
     }
 
     function updateUI() {
-        document.getElementById('money
+        let moneyEl = document.getElementById('money');
+        let lvlEl = document.getElementById('lvl-txt');
+        let pwrEl = document.getElementById('pwr-val');
+        let multEl = document.getElementById('mult-val');
+        let xpBarEl = document.getElementById('xp-bar');
+
+        if(moneyEl) moneyEl.innerText = "$" + Math.floor(game.money).toLocaleString();
+        if(lvlEl) lvlEl.innerText = "УРОВЕНЬ " + game.lvl;
+        
+        let totalMult = (1 + game.prestigeCount);
+        if(pwrEl) pwrEl.innerText = game.pwr.toLocaleString();
+        if(multEl) multEl.innerText = game.prestigeCount > 0 ? (Множитель: x${totalMult}) : "";
+        
+        let xpPercent = (game.xp / game.nextXp) * 100;
+        if(xpBarEl) xpBarEl.style.width = xpPercent + "%";
+        
+        updateRageBar();
+        updateSkin();
+
+        let nextRebornLvl = 15 + (game.prestigeCount * 5);
+        const rebornBtn = document.getElementById('reborn-btn');
+        const rebornDesc = document.getElementById('reborn-desc');
+        
+        if (rebornDesc) rebornDesc.innerText = Требуется уровень: ${nextRebornLvl} (Текущий: ${game.lvl});
+        
+        if (rebornBtn) {
+            if (game.lvl >= nextRebornLvl) {
+                rebornBtn.disabled = false;
+                rebornBtn.innerText = ПЕРЕРОЖДЕНИЕ (на x${totalMult + 1});
+            } else {
+                rebornBtn.disabled = true;
+                rebornBtn.innerText = БЛОКИРОВАНО;
+            }
+        }
+
+        let htmlHtml = "";
+        game.upgrades.forEach((u, i) => {
+            const canBuy = game.money >= u.cost;
+            htmlHtml += `
+                <div class="item">
+                    <b>${u.name}</b>
+                    <small>Эффект: +${(u.bonus * totalMult).toLocaleString()} к клику</small>
+                    <button onclick="buyUpgrade(${i})" ${canBuy ? '' : 'disabled'}>
+                        $${u.cost.toLocaleString()}
+                    </button>
+                </div>
+            `;
+        });
+        let shopList = document.getElementById('shop-list');
+        if(shopList) shopList.innerHTML = htmlHtml;
+    }
+
+    function saveGame() { localStorage.setItem('runUltimateSaveV3', JSON.stringify(game)); }
+
+    function notify(msg) {
+        const n = document.getElementById('notify-msg');
+        if(!n) return;
+        n.innerText = msg;
+        n.style.opacity = "1";
+        setTimeout(() => { n.style.opacity = "0"; }, 2000);
+    }
+
+    function hardReset() {
+        if(confirm("Очистить все данные?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    window.onload = startLoading;
+</script>
+</body>
+</html>
